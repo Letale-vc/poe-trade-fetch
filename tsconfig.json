@@ -3,12 +3,12 @@
     "target": "ESNext",
     "module": "CommonJS",
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "allowJs": true,
     "strict": true,
     "declaration": true,
     "removeComments": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules", "**/*.spec.ts", "dist", "coverage"]
+  "exclude": ["node_modules", "**/*.spec.ts", "dist", "coverage", "tests"]
 }
