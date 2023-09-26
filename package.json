@@ -1,10 +1,11 @@
 {
   "name": "poe-trade-fetch",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "poe trade fetch",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "prebuild": "rimraf dist",
+    "build": "npm run rimraf && tsc",
     "lint": "eslint src/**/*.ts",
     "format": "eslint src/**/*.ts --fix",
     "test": "jest"

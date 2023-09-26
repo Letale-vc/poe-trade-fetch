@@ -10,5 +10,5 @@
     "removeComments": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules", "**/*.spec.ts", "dist"]
+  "exclude": ["node_modules", "**/*.spec.ts", "dist", "coverage"]
 }
