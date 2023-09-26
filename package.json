@@ -1,0 +1,46 @@
+{
+  "name": "poe-trade-fetch",
+  "version": "1.0.0",
+  "description": "poe trade fetch",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Letale-vc/poe-trade-fetch.git"
+  },
+  "keywords": [
+    "Path of Exile",
+    "trade",
+    "fetch",
+    "API",
+    "typescript"
+  ],
+  "author": "Helpless",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Letale-vc/poe-trade-fetch/issues"
+  },
+  "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
+  "dependencies": {
+    "axios": "^1.5.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.5",
+    "@types/node": "^20.6.3",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}
