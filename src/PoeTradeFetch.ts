@@ -156,7 +156,7 @@ export class PoeTradeFetch {
     const requestBody = this.getRequestBody(page);
     const { result } = await this.firsRequest(requestBody);
     // Вибираємо перші 10 ідентифікаторів з результату першого запиту і передаємо їх у другий запит
-    const identifiers = result.length > 10 ? result.slice(0, 9) : result;
+    const identifiers = result.length > 10 ? result.slice(0, 10) : result;
     return await this.secondRequest(identifiers, queryId);
   }
 

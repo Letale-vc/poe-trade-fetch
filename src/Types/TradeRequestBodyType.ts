@@ -1,12 +1,12 @@
 export interface RequestBodyType {
-  query: QueryType;
-  sort: SortType;
+  query?: QueryType;
+  sort?: SortType;
 }
 export interface SortType {
   [key: string]: string;
 }
 export interface QueryType {
-  status?: Status;
+  status?: Status | string;
   name?: string | Name;
   type?: string | Type;
   term?: string;
@@ -14,16 +14,16 @@ export interface QueryType {
   filters?: Filters;
 }
 interface Filters {
-  misc_filters: MiscFilters;
-  type_filters: TypeFilters;
-  trade_filters: TradeFilters;
-  sanctum_filters: SanctumFilters;
-  heist_filters: HeistFilters;
-  map_filters: MapFilters;
-  req_filters: ReqFilters;
-  socket_filters: SocketFilters;
-  armour_filters: ArmourFilters;
-  weapon_filters: WeaponFilters;
+  misc_filters?: MiscFilters;
+  type_filters?: TypeFilters;
+  trade_filters?: TradeFilters;
+  sanctum_filters?: SanctumFilters;
+  heist_filters?: HeistFilters;
+  map_filters?: MapFilters;
+  req_filters?: ReqFilters;
+  socket_filters?: SocketFilters;
+  armour_filters?: ArmourFilters;
+  weapon_filters?: WeaponFilters;
 }
 interface Status {
   option?: string;
@@ -38,9 +38,9 @@ interface Type {
 }
 
 interface Stat {
-  type: string;
-  filters: Filter[];
-  disabled: boolean;
+  type?: string;
+  filters?: Filter[];
+  disabled?: boolean;
   value?: {
     min?: number | null;
     weight?: number;
@@ -49,8 +49,8 @@ interface Stat {
 }
 
 interface Filter {
-  id: string;
-  disabled: boolean;
+  id?: string;
+  disabled?: boolean;
   value?: {
     min?: number | null;
     weight?: number;
@@ -59,7 +59,7 @@ interface Filter {
 }
 
 interface MiscFilters {
-  filters: {
+  filters?: {
     quality?: RangeFilter;
     gem_level?: RangeFilter;
     ilvl?: RangeFilter;
@@ -83,31 +83,31 @@ interface MiscFilters {
     alternate_art?: OptionFilter;
     foil_variation?: OptionFilter;
   };
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 interface TypeFilters {
-  filters: {
+  filters?: {
     rarity?: OptionFilter;
     category?: OptionFilter;
   };
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 interface TradeFilters {
-  filters: {
+  filters?: {
     account?: InputFilter;
     collapse?: OptionFilter;
     indexed?: OptionFilter;
     sale_type?: OptionFilter;
     price?: PriceFilter;
   };
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 interface SanctumFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     sanctum_resolve?: RangeFilter;
     sanctum_inspiration?: RangeFilter;
     sanctum_max_resolve?: RangeFilter;
@@ -116,8 +116,8 @@ interface SanctumFilters {
 }
 
 interface HeistFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     heist_wings?: RangeFilter;
     heist_reward_rooms?: RangeFilter;
     heist_escape_routes?: RangeFilter;
@@ -138,8 +138,8 @@ interface HeistFilters {
 }
 
 interface MapFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     map_tier?: RangeFilter;
     map_iiq?: RangeFilter;
     area_level?: RangeFilter;
@@ -152,8 +152,8 @@ interface MapFilters {
 }
 
 interface ReqFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     lvl?: RangeFilter;
     dex?: RangeFilter;
     class?: OptionFilter;
@@ -163,16 +163,16 @@ interface ReqFilters {
 }
 
 interface SocketFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     sockets?: SocketsFilter;
     links?: LinksFilter;
   };
 }
 
 interface ArmourFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     ar?: RangeFilter;
     es?: RangeFilter;
     block?: RangeFilter;
@@ -183,8 +183,8 @@ interface ArmourFilters {
 }
 
 interface WeaponFilters {
-  disabled: boolean;
-  filters: {
+  disabled?: boolean;
+  filters?: {
     damage?: RangeFilter;
     crit?: RangeFilter;
     pdps?: RangeFilter;

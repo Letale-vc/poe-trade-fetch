@@ -15,10 +15,7 @@
   },
   "keywords": [
     "Path of Exile",
-    "trade",
-    "fetch",
-    "API",
-    "typescript"
+    "fetch"
   ],
   "author": "Helpless",
   "license": "MIT",
