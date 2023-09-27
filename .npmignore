@@ -2,7 +2,6 @@ src/
 node_modules/
 .git/
 tests
-coverage
 tsconfig.json
 jest.config.json
 package-lock.json
@@ -102,8 +101,6 @@ web_modules/
 .next
 out
 coverage
-
-dist
 
 # Gatsby files
 .cache/
