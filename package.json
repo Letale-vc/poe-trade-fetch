@@ -1,8 +1,8 @@
 {
   "name": "poe-trade-fetch",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "poe trade fetch",
-  "main": "dist/index.js",
+  "main": "index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "rimraf dist",
