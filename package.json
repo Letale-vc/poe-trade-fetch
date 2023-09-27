@@ -1,9 +1,9 @@
 {
   "name": "poe-trade-fetch",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "poe trade fetch",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts", 
+  "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "npm run prebuild && tsc",
@@ -34,6 +34,7 @@
     "@types/node": "^20.6.3",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
     "@typescript-eslint/parser": "^6.7.2",
+    "axios-mock-adapter": "^1.22.0",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

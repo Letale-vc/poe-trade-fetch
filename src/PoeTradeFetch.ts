@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios';
-
 import {
   PoeFirstResponseType,
   PoeSecondResponseType,
@@ -24,16 +23,24 @@ import { QueryType, RequestBodyType } from './Types/TradeRequestBodyType';
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
   leagueName: string = '';
-
   config = DEFAULT_CONFIG;
   axiosInstance: AxiosInstance;
   // state rate limit
-  accountLimitState: number[] = [1, 4, 0];
-  ipLimitState: number[] = [1, 4, 0];
+  accountLimitState: Array<number[]> = [[1, 4, 0]];
+  ipLimitState: Array<number[]> = [[1, 4, 0]];
 
   constructor(config: ConfigInputType = {}) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
     this.config = { ...this.config, ...config };
+    this.axiosInstance = this._createAxiosInstance();
+    // Додавання перехоплювача запитів для затримки перед кожним запитом
+    this._setupRequestInterceptors();
+    // Перехоплювач відповідей для оновлення стану обмежень на основі заголовків відповідей
+    this._setupResponseInterceptors();
+  }
+  // constructor END
+
+  _createAxiosInstance(): AxiosInstance {
     const axiosConfig: CreateAxiosDefaults = {
       headers: {
         'Content-Type': 'application/json',
@@ -41,23 +48,29 @@ export class PoeTradeFetch {
         access: '*/*',
       },
     };
-    this.axiosInstance = axios.create(axiosConfig);
-    // Додавання перехоплювача запитів для затримки перед кожним запитом
+    return axios.create(axiosConfig);
+  }
+  _setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async (config) => {
-      // Перевірка поточного стану лімітів для облікового запису та IP
-      const [accountCurrent, accountPeriod, accountTime] = this.accountLimitState;
-      const [ipCurrent, ipPeriod, ipTime] = this.ipLimitState;
-      // Якщо поточний стан не перевищує ліміти, продовжуємо
-      if (accountCurrent < accountPeriod && ipCurrent < ipPeriod) {
-        // У випадку порушення лімітів обчислюємо, скільки часу потрібно почекати
-        const waitTime = Math.max(accountTime, ipTime);
-        console.log(`Exceeding limits. We wait ${waitTime} seconds.`);
-        // Затримка на вказану кількість секунд
-        await delay(waitTime);
-      }
+      const checkRateLimit = async (rateLimitState: Array<number[]>) => {
+        const { waitTime, violated } = rateLimitState.reduce(
+          (acc, [current, period, waitTime]) => {
+            const violated = current >= period;
+            return { waitTime: violated ? waitTime : acc.waitTime, violated };
+          },
+          { waitTime: 0, violated: false },
+        );
+        if (violated) {
+          console.log(`Exceeding limits. We wait ${waitTime} seconds.`);
+          await delay(waitTime);
+        }
+      };
+      await Promise.all([checkRateLimit(this.accountLimitState), checkRateLimit(this.ipLimitState)]);
       return config;
     });
+  }
 
+  _setupResponseInterceptors() {
     // Перехоплювач відповідей для оновлення стану обмежень на основі заголовків відповідей
     this.axiosInstance.interceptors.response.use((res) => {
       // Updating the state of limits based on response headers
@@ -65,20 +78,18 @@ export class PoeTradeFetch {
       const accountState = headers['X-Rate-Limit-Account-State'];
       const ipState = headers['X-Rate-Limit-Ip-State'];
       if (accountState) {
-        this.accountLimitState = accountState.split(':').map(Number);
+        this.accountLimitState = accountState.split(';').map((el: string) => el.split(':').map(Number));
       }
       if (ipState) {
-        this.ipLimitState = ipState.split(':').map(Number);
+        this.ipLimitState = ipState.split(';').map((el: string) => el.split(':').map(Number));
       }
       return res;
     });
   }
-  // constructor END
 
   // Метод для оновлення конфігурації
   async update(config: ConfigInputType = {}) {
     this.config = { ...this.config, ...config };
-
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
       const currentLeagueName = await this.getCurrentLeagueName();
       this.leagueName = !currentLeagueName
@@ -100,8 +111,7 @@ export class PoeTradeFetch {
 
   // Метод для отримання списку доступних ліг
   async leagueNames() {
-    const { data } = await this.axiosInstance.get<ResponseLeagueListType>(POE_API_TRADE_DATA_LEAGUES_URL);
-    return data.result;
+    return (await this.axiosInstance.get<ResponseLeagueListType>(POE_API_TRADE_DATA_LEAGUES_URL)).data.result;
   }
 
   // Метод для отримання назви поточної ліги
@@ -118,8 +128,7 @@ export class PoeTradeFetch {
 
   // Метод для отримання інформації про предмети
   async tradeDataItems() {
-    const { data } = await this.axiosInstance.get<PoeTradeDataItemsResponseType>(POE_API_TRADE_DATA_ITEMS_URL);
-    return data;
+    return (await this.axiosInstance.get<PoeTradeDataItemsResponseType>(POE_API_TRADE_DATA_ITEMS_URL)).data;
   }
 
   // Перший запит, щоб отримати ідентифікатори предметів, розташованих на торгівельній платформі
@@ -128,9 +137,7 @@ export class PoeTradeFetch {
     const url = POE_API_FIRST_REQUEST.replace(':league', this.leagueName);
     // Замінюємо :realm на значення конфігурації realm для не-PC реалмів
     this.config.realm === REALMS.pc ? url.replace('/:realm', '') : url.replace(':realm', this.config.realm);
-
-    const { data } = await this.axiosInstance.post<PoeFirstResponseType>(url, requestQuery);
-    return data;
+    return (await this.axiosInstance.post<PoeFirstResponseType>(url, requestQuery)).data;
   }
 
   // Другий запит, для отримання інформації про предмети за їх ідентифікаторами
@@ -145,8 +152,7 @@ export class PoeTradeFetch {
     if (this.config.realm !== REALMS.pc) {
       url.searchParams.set('realm', this.config.realm);
     }
-    const { data } = await this.axiosInstance.get<PoeSecondResponseType>(url.toString());
-    return data;
+    return (await this.axiosInstance.get<PoeSecondResponseType>(url.toString())).data;
   }
 
   // Метод для пошуку по URL торгівельної платформи PoE
@@ -167,8 +173,7 @@ export class PoeTradeFetch {
     const addLeagueUrl = baseUrl.replace(':league', this.leagueName);
     const addQueryId = addLeagueUrl.replace(':id', queryId);
     const url = new URL(addQueryId);
-    const { data } = await this.axiosInstance.get<string>(url.toString());
-    return data;
+    return (await this.axiosInstance.get<string>(url.toString())).data;
   }
 
   // Розділення URL на частини та отримання ідентифікатора запиту
