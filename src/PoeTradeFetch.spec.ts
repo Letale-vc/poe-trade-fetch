@@ -135,8 +135,8 @@ describe('PoeTradeFetch', () => {
   describe('PoeTradeFetch axios Response Interceptor', () => {
     it('should update accountLimitState and ipLimitState based on response headers', async () => {
       const responseHeaders = {
-        'X-Rate-Limit-Account-State': '2:4:10;5:10:11',
-        'X-Rate-Limit-Ip-State': '3:8:15;0:12:30',
+        'X-Rate-Limit-Account-State': '1:5:0',
+        'X-Rate-Limit-Ip-State': '1:10:0,0:60:26,92:300:1530',
       };
       const responseData = {
         result: [],
@@ -158,7 +158,11 @@ describe('PoeTradeFetch', () => {
     it('should delay requests when rate limits are exceeded for both account and IP', async () => {
       mockAxios
         .onAny()
-        .reply(200, { result: [] }, { 'X-Rate-Limit-Account-State': '3:4:12', 'X-Rate-Limit-Ip-State': '6:12:60' });
+        .reply(
+          200,
+          { result: [] },
+          { 'X-Rate-Limit-Account-State': '1:5:0', 'X-Rate-Limit-Ip-State': '1:10:0,0:60:26,92:300:1530' },
+        );
       poeTradeFetch.accountLimitState = [
         [1, 4, 12],
         [1, 12, 25],

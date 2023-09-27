@@ -78,10 +78,10 @@ export class PoeTradeFetch {
       const accountState = headers['X-Rate-Limit-Account-State'];
       const ipState = headers['X-Rate-Limit-Ip-State'];
       if (accountState) {
-        this.accountLimitState = accountState.split(';').map((el: string) => el.split(':').map(Number));
+        this.accountLimitState = accountState.split(',').map((el: string) => el.split(':').map(Number));
       }
       if (ipState) {
-        this.ipLimitState = ipState.split(';').map((el: string) => el.split(':').map(Number));
+        this.ipLimitState = ipState.split(',').map((el: string) => el.split(':').map(Number));
       }
       return res;
     });
