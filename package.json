@@ -1,6 +1,6 @@
 {
   "name": "poe-trade-fetch",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "poe trade fetch",
   "main": "index.js",
   "types": "dist/index.d.ts",

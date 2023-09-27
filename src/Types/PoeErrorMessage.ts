@@ -19,5 +19,5 @@ export const PoeErrorCodes = {
   10: 'Unprocessable Entity',
 };
 
-type ErrorCodesType = keyof PoeErrorMessage;
+type ErrorCodesType = keyof typeof PoeErrorCodes;
 type ErrorMessagesType = (typeof PoeErrorCodes)[keyof typeof PoeErrorCodes];
