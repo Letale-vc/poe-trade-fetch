@@ -143,13 +143,11 @@ describe('PoeTradeFetch', () => {
       };
       mockAxios.onAny().reply(200, responseData, responseHeaders);
       await poeTradeFetch.axiosInstance.get('http://test.kek');
-      expect(poeTradeFetch.accountLimitState).toEqual([
-        [2, 4, 10],
-        [5, 10, 11],
-      ]);
-      expect(poeTradeFetch.ipLimitState).toEqual([
-        [3, 8, 15],
-        [0, 12, 30],
+      expect(poeTradeFetch.firstRequestStateLimit.accountLimitState).toEqual([[1, 5, 0]]);
+      expect(poeTradeFetch.firstRequestStateLimit.ipLimitState).toEqual([
+        [1, 10, 0],
+        [0, 60, 26],
+        [92, 300, 1530],
       ]);
     });
   });
@@ -163,19 +161,19 @@ describe('PoeTradeFetch', () => {
           { result: [] },
           { 'X-Rate-Limit-Account-State': '1:5:0', 'X-Rate-Limit-Ip-State': '1:10:0,0:60:26,92:300:1530' },
         );
-      poeTradeFetch.accountLimitState = [
+      poeTradeFetch.firstRequestStateLimit.accountLimitState = [
         [1, 4, 12],
         [1, 12, 25],
       ];
-      poeTradeFetch.ipLimitState = [
-        [2, 4, 4],
-        [12, 12, 30],
+      poeTradeFetch.firstRequestStateLimit.ipLimitState = [
+        [1, 10, 0],
+        [59, 60, 26],
+        [92, 300, 1530],
       ];
       const mockDelay = jest.spyOn(util, 'delay').mockResolvedValue();
       await poeTradeFetch.axiosInstance.get('http://test.kek');
-      // Перевіряємо, чи була затримка принаймні 60 секунд (мінімальний інтервал згідно з X-Rate-Limit-*
-      expect(mockDelay).toBeCalledWith(30);
-      expect(mockDelay).toBeCalledTimes(1);
+      expect(mockDelay).toBeCalledWith(26);
+      expect(mockDelay).toBeCalledTimes(2);
     });
   });
 });

@@ -16,7 +16,7 @@ import {
   POE_SEARCH_PAGE_URL,
   REALMS,
 } from './constants';
-import { ConfigInputType, PoeTradeFetchConfigType } from './Types/types';
+import { ConfigInputType, PoeTradeFetchConfigType, RateStateLimitType } from './Types/types';
 import * as cheerio from 'cheerio';
 import { QueryType, RequestBodyType } from './Types/TradeRequestBodyType';
 
@@ -26,8 +26,14 @@ export class PoeTradeFetch {
   config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
   axiosInstance: AxiosInstance;
   // state rate limit
-  accountLimitState: Array<number[]> = [[1, 4, 0]];
-  ipLimitState: Array<number[]> = [[1, 4, 0]];
+  firstRequestStateLimit = {
+    accountLimitState: [[1, 4, 0]],
+    ipLimitState: [[1, 4, 0]],
+  };
+  secondRequestStateLimit = {
+    accountLimitState: [[1, 4, 0]],
+    ipLimitState: [[1, 4, 0]],
+  };
 
   constructor(config: ConfigInputType = {}) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
@@ -50,22 +56,26 @@ export class PoeTradeFetch {
     };
     return axios.create(axiosConfig);
   }
+  async _rateLimitCheck(state: RateStateLimitType) {
+    const checkState = async (rateLimitState: Array<number[]>) => {
+      const { waitTime } = rateLimitState.reduce(
+        (acc, [current, period, waitTime]) => {
+          const violated = current >= period - 1;
+          return { waitTime: violated ? waitTime : acc.waitTime, violated };
+        },
+        { waitTime: 1, violated: false },
+      );
+      await delay(waitTime);
+    };
+    await Promise.all([checkState(state.accountLimitState), checkState(state.ipLimitState)]);
+  }
   _setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async (config) => {
-      const checkRateLimit = async (rateLimitState: Array<number[]>) => {
-        const { waitTime, violated } = rateLimitState.reduce(
-          (acc, [current, period, waitTime]) => {
-            const violated = current >= period;
-            return { waitTime: violated ? waitTime : acc.waitTime, violated };
-          },
-          { waitTime: 0, violated: false },
-        );
-        if (violated) {
-          console.log(`Exceeding limits. We wait ${waitTime} seconds.`);
-          await delay(waitTime);
-        }
-      };
-      await Promise.all([checkRateLimit(this.accountLimitState), checkRateLimit(this.ipLimitState)]);
+      if (config.url && config.url.includes(POE_API_SECOND_REQUEST)) {
+        await this._rateLimitCheck(this.secondRequestStateLimit);
+      } else {
+        await this._rateLimitCheck(this.firstRequestStateLimit);
+      }
       return config;
     });
   }
@@ -77,12 +87,26 @@ export class PoeTradeFetch {
       const headers = res.headers;
       const accountState = headers['X-Rate-Limit-Account-State'];
       const ipState = headers['X-Rate-Limit-Ip-State'];
-      if (accountState) {
-        this.accountLimitState = accountState.split(',').map((el: string) => el.split(':').map(Number));
+      if (res.config.url && res.config.url.includes(POE_API_SECOND_REQUEST)) {
+        if (accountState) {
+          this.secondRequestStateLimit.accountLimitState = accountState
+            .split(',')
+            .map((el: string) => el.split(':').map(Number));
+        }
+        if (ipState) {
+          this.secondRequestStateLimit.ipLimitState = ipState.split(',').map((el: string) => el.split(':').map(Number));
+        }
+      } else {
+        if (accountState) {
+          this.firstRequestStateLimit.accountLimitState = accountState
+            .split(',')
+            .map((el: string) => el.split(':').map(Number));
+        }
+        if (ipState) {
+          this.firstRequestStateLimit.ipLimitState = ipState.split(',').map((el: string) => el.split(':').map(Number));
+        }
       }
-      if (ipState) {
-        this.ipLimitState = ipState.split(',').map((el: string) => el.split(':').map(Number));
-      }
+
       return res;
     });
   }

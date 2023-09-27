@@ -12,3 +12,7 @@ export interface PoeTradeFetchConfigType {
 }
 export type RealmsType = (typeof REALMS)[keyof typeof REALMS];
 export type LeaguesNamesType = (typeof LEAGUES_NAMES)[keyof typeof LEAGUES_NAMES];
+export interface RateStateLimitType {
+  accountLimitState: Array<number[]>;
+  ipLimitState: Array<number[]>;
+}
