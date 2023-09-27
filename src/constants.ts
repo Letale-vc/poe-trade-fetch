@@ -19,16 +19,16 @@ export const LEAGUES_NAMES = {
   HCRuthlessCurrent: 'HC Ruthless Current',
   RuthlessCurrent: 'Ruthless Current',
   HardcoreCurrent: 'Hardcore Current',
-};
+} as const;
 
 //--------------------------------------------
 
 // --- game realms ---
 export const REALMS = {
-  pc: '',
+  pc: 'pc',
   xbox: 'xbox',
   sony: 'sony',
-};
+} as const;
 
 //------------------------------------
 
@@ -37,4 +37,4 @@ export const DEFAULT_CONFIG = {
   leagueName: LEAGUES_NAMES.Standard,
   userAgent: 'PoE Trade Fetch https://github.com/Letale-vc/poe-trade-fetch',
   realm: REALMS.pc,
-};
+} as const;

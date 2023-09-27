@@ -16,14 +16,14 @@ import {
   POE_SEARCH_PAGE_URL,
   REALMS,
 } from './constants';
-import { ConfigInputType } from './Types/types';
+import { ConfigInputType, PoeTradeFetchConfigType } from './Types/types';
 import * as cheerio from 'cheerio';
 import { QueryType, RequestBodyType } from './Types/TradeRequestBodyType';
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
   leagueName: string = '';
-  config = DEFAULT_CONFIG;
+  config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
   axiosInstance: AxiosInstance;
   // state rate limit
   accountLimitState: Array<number[]> = [[1, 4, 0]];
@@ -134,9 +134,9 @@ export class PoeTradeFetch {
   // Перший запит, щоб отримати ідентифікатори предметів, розташованих на торгівельній платформі
   async firsRequest(requestQuery: RequestBodyType) {
     // Додаємо лігу до URL
-    const url = POE_API_FIRST_REQUEST.replace(':league', this.leagueName);
+    let url = POE_API_FIRST_REQUEST.replace(':league', this.leagueName);
     // Замінюємо :realm на значення конфігурації realm для не-PC реалмів
-    this.config.realm === REALMS.pc ? url.replace('/:realm', '') : url.replace(':realm', this.config.realm);
+    url = this.config.realm === REALMS.pc ? url.replace('/:realm', '') : url.replace(':realm', this.config.realm);
     return (await this.axiosInstance.post<PoeFirstResponseType>(url, requestQuery)).data;
   }
 
