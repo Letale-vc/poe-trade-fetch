@@ -28,24 +28,36 @@ export class PoeTradeFetch {
   // state rate limit
   firstRequestStateLimit = {
     accountLimit: [[3, 5, 60]],
-    accountLimitState: [[1, 4, 0]],
+    accountLimitState: [[0, 5, 0]],
     ipLimit: [
       [8, 10, 60],
       [15, 60, 120],
       [60, 300, 1800],
     ],
-    ipLimitState: [[1, 4, 0]],
+    ipLimitState: [
+      [0, 10, 0],
+      [0, 60, 0],
+      [0, 300, 0],
+    ],
   };
   secondRequestStateLimit = {
     accountLimit: [[6, 4, 10]],
-    accountLimitState: [[1, 4, 0]],
+    accountLimitState: [[0, 4, 0]],
     ipLimit: [
       [12, 4, 60],
       [16, 12, 60],
     ],
-    ipLimitState: [[1, 4, 0]],
+    ipLimitState: [
+      [0, 4, 0],
+      [0, 12, 0],
+    ],
   };
-
+  otherRequestLimit: RateStateLimitType = {
+    accountLimit: [],
+    accountLimitState: [],
+    ipLimit: [],
+    ipLimitState: [],
+  };
   constructor(config: ConfigInputType = {}) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
     this.config = { ...this.config, ...config };
@@ -69,15 +81,21 @@ export class PoeTradeFetch {
   }
   async _rateLimitCheck(state: RateStateLimitType) {
     const checkState = async (rateLimitState: Array<number[]>, limit: Array<number[]>) => {
-      const { waitTime } = rateLimitState.reduce(
+      const { waitTime, violated } = rateLimitState.reduce(
         (acc, [current, period], index) => {
-          const violated = current >= period - 1;
-          return { waitTime: violated ? limit[index][2] : acc.waitTime, violated };
+          const [maxHits] = limit[index];
+          const checkViolated = current >= maxHits / 2;
+          const newWaitTime = period / maxHits;
+          return {
+            waitTime: checkViolated ? newWaitTime : acc.waitTime,
+            violated: checkViolated ? checkViolated : acc.violated,
+          };
         },
         { waitTime: 0, violated: false },
       );
-      await delay(waitTime);
+      if (violated) await delay(waitTime);
     };
+
     await Promise.all([
       checkState(state.accountLimitState, state.accountLimit),
       checkState(state.ipLimitState, state.ipLimit),
@@ -87,20 +105,22 @@ export class PoeTradeFetch {
     this.axiosInstance.interceptors.request.use(async (config) => {
       if (config.url && config.url.includes(POE_API_SECOND_REQUEST)) {
         await this._rateLimitCheck(this.secondRequestStateLimit);
-      } else {
+      } else if (config.url && config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
         await this._rateLimitCheck(this.firstRequestStateLimit);
+      } else {
+        this._rateLimitCheck(this.otherRequestLimit);
       }
       return config;
     });
   }
   _updateRateLimits(res: AxiosResponse, state: RateStateLimitType): RateStateLimitType {
     const headers = res.headers;
-    const updatedState = { ...state };
+    const updatedState: RateStateLimitType = { ...state };
     const headerMappings: Record<string, keyof RateStateLimitType> = {
-      'X-Rate-Limit-Account-State': 'accountLimitState',
-      'X-Rate-Limit-Account': 'accountLimit',
-      'X-Rate-Limit-Ip-State': 'ipLimitState',
-      'X-Rate-Limit-Ip': 'ipLimit',
+      'x-rate-limit-account-state': 'accountLimitState',
+      'x-rate-limit-account': 'accountLimit',
+      'x-rate-limit-ip-state': 'ipLimitState',
+      'x-rate-limit-ip': 'ipLimit',
     };
     for (const header in headerMappings) {
       if (headers[header]) {
@@ -117,7 +137,10 @@ export class PoeTradeFetch {
         this.secondRequestStateLimit = this._updateRateLimits(res, this.secondRequestStateLimit);
       } else if (res.config.url && res.config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
         this.firstRequestStateLimit = this._updateRateLimits(res, this.firstRequestStateLimit);
+      } else {
+        this.otherRequestLimit = this._updateRateLimits(res, this.otherRequestLimit);
       }
+
       return res;
     });
   }
@@ -140,7 +163,9 @@ export class PoeTradeFetch {
     // Якщо екземпляра ще не існує, створіть його
     if (!PoeTradeFetch.instance) {
       PoeTradeFetch.instance = new PoeTradeFetch(config);
+      await PoeTradeFetch.instance.update();
     }
+
     return PoeTradeFetch.instance;
   }
 
@@ -203,12 +228,12 @@ export class PoeTradeFetch {
 
   // Метод для отримання сторінки торгівлі за її ідентифікатором
   async getTradePage(queryId: string, poesessid: string) {
-    this.axiosInstance.defaults.headers.common['Cookie'] = `POESESSID=${poesessid}`;
     const baseUrl = POE_SEARCH_PAGE_URL;
     const addLeagueUrl = baseUrl.replace(':league', this.leagueName);
     const addQueryId = addLeagueUrl.replace(':id', queryId);
     const url = new URL(addQueryId);
-    return (await this.axiosInstance.get<string>(url.toString())).data;
+    return (await this.axiosInstance.get<string>(url.toString(), { headers: { Cookie: `POESESSID=${poesessid}` } }))
+      .data;
   }
 
   // Розділення URL на частини та отримання ідентифікатора запиту

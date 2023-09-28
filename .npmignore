@@ -5,6 +5,8 @@ tests
 tsconfig.json
 jest.config.json
 package-lock.json
+.eslintrc.js
+jest.config.json
 .prettierrc.json
 .gitignore
 # me ignores
