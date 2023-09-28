@@ -15,4 +15,6 @@ export type LeaguesNamesType = (typeof LEAGUES_NAMES)[keyof typeof LEAGUES_NAMES
 export interface RateStateLimitType {
   accountLimitState: Array<number[]>;
   ipLimitState: Array<number[]>;
+  accountLimit: Array<number[]>;
+  ipLimit: Array<number[]>;
 }

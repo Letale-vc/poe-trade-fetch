@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, CreateAxiosDefaults } from 'axios';
 import {
   PoeFirstResponseType,
   PoeSecondResponseType,
@@ -27,11 +27,22 @@ export class PoeTradeFetch {
   axiosInstance: AxiosInstance;
   // state rate limit
   firstRequestStateLimit = {
+    accountLimit: [[3, 5, 60]],
     accountLimitState: [[1, 4, 0]],
+    ipLimit: [
+      [8, 10, 60],
+      [15, 60, 120],
+      [60, 300, 1800],
+    ],
     ipLimitState: [[1, 4, 0]],
   };
   secondRequestStateLimit = {
+    accountLimit: [[6, 4, 10]],
     accountLimitState: [[1, 4, 0]],
+    ipLimit: [
+      [12, 4, 60],
+      [16, 12, 60],
+    ],
     ipLimitState: [[1, 4, 0]],
   };
 
@@ -57,17 +68,20 @@ export class PoeTradeFetch {
     return axios.create(axiosConfig);
   }
   async _rateLimitCheck(state: RateStateLimitType) {
-    const checkState = async (rateLimitState: Array<number[]>) => {
+    const checkState = async (rateLimitState: Array<number[]>, limit: Array<number[]>) => {
       const { waitTime } = rateLimitState.reduce(
-        (acc, [current, period, waitTime]) => {
+        (acc, [current, period], index) => {
           const violated = current >= period - 1;
-          return { waitTime: violated ? waitTime : acc.waitTime, violated };
+          return { waitTime: violated ? limit[index][2] : acc.waitTime, violated };
         },
-        { waitTime: 1, violated: false },
+        { waitTime: 0, violated: false },
       );
       await delay(waitTime);
     };
-    await Promise.all([checkState(state.accountLimitState), checkState(state.ipLimitState)]);
+    await Promise.all([
+      checkState(state.accountLimitState, state.accountLimit),
+      checkState(state.ipLimitState, state.ipLimit),
+    ]);
   }
   _setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async (config) => {
@@ -79,34 +93,31 @@ export class PoeTradeFetch {
       return config;
     });
   }
-
-  _setupResponseInterceptors() {
-    // Перехоплювач відповідей для оновлення стану обмежень на основі заголовків відповідей
-    this.axiosInstance.interceptors.response.use((res) => {
-      // Updating the state of limits based on response headers
-      const headers = res.headers;
-      const accountState = headers['X-Rate-Limit-Account-State'];
-      const ipState = headers['X-Rate-Limit-Ip-State'];
-      if (res.config.url && res.config.url.includes(POE_API_SECOND_REQUEST)) {
-        if (accountState) {
-          this.secondRequestStateLimit.accountLimitState = accountState
-            .split(',')
-            .map((el: string) => el.split(':').map(Number));
-        }
-        if (ipState) {
-          this.secondRequestStateLimit.ipLimitState = ipState.split(',').map((el: string) => el.split(':').map(Number));
-        }
-      } else {
-        if (accountState) {
-          this.firstRequestStateLimit.accountLimitState = accountState
-            .split(',')
-            .map((el: string) => el.split(':').map(Number));
-        }
-        if (ipState) {
-          this.firstRequestStateLimit.ipLimitState = ipState.split(',').map((el: string) => el.split(':').map(Number));
-        }
+  _updateRateLimits(res: AxiosResponse, state: RateStateLimitType): RateStateLimitType {
+    const headers = res.headers;
+    const updatedState = { ...state };
+    const headerMappings: Record<string, keyof RateStateLimitType> = {
+      'X-Rate-Limit-Account-State': 'accountLimitState',
+      'X-Rate-Limit-Account': 'accountLimit',
+      'X-Rate-Limit-Ip-State': 'ipLimitState',
+      'X-Rate-Limit-Ip': 'ipLimit',
+    };
+    for (const header in headerMappings) {
+      if (headers[header]) {
+        updatedState[headerMappings[header]] = headers[header]
+          .split(',')
+          .map((el: string) => el.split(':').map(Number));
       }
-
+    }
+    return updatedState;
+  }
+  _setupResponseInterceptors() {
+    this.axiosInstance.interceptors.response.use((res) => {
+      if (res.config.url && res.config.url.includes(POE_API_SECOND_REQUEST)) {
+        this.secondRequestStateLimit = this._updateRateLimits(res, this.secondRequestStateLimit);
+      } else if (res.config.url && res.config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
+        this.firstRequestStateLimit = this._updateRateLimits(res, this.firstRequestStateLimit);
+      }
       return res;
     });
   }

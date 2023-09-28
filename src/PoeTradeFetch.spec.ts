@@ -7,6 +7,7 @@ import { readFileSync } from 'fs';
 import { RequestBodyType } from './Types/TradeRequestBodyType';
 import MockAdapter from 'axios-mock-adapter';
 import * as util from './Helpers/Utils';
+import { AxiosResponse } from 'axios';
 
 describe('PoeTradeFetch', () => {
   let poeTradeFetch: PoeTradeFetch;
@@ -133,24 +134,46 @@ describe('PoeTradeFetch', () => {
   });
 
   describe('PoeTradeFetch axios Response Interceptor', () => {
-    it('should update accountLimitState and ipLimitState based on response headers', async () => {
+    it('should update accountLimitState, ipLimitState, accountLimit, and ipLimit based on response headers', async () => {
       const responseHeaders = {
         'X-Rate-Limit-Account-State': '1:5:0',
+        'X-Rate-Limit-Account': '3:5:60',
         'X-Rate-Limit-Ip-State': '1:10:0,0:60:26,92:300:1530',
+        'X-Rate-Limit-Ip': '8:10:60,15:60:120,60:300:1800',
       };
       const responseData = {
         result: [],
       };
-      mockAxios.onAny().reply(200, responseData, responseHeaders);
-      await poeTradeFetch.axiosInstance.get('http://test.kek');
-      expect(poeTradeFetch.firstRequestStateLimit.accountLimitState).toEqual([[1, 5, 0]]);
-      expect(poeTradeFetch.firstRequestStateLimit.ipLimitState).toEqual([
+
+      const axiosResponse = {
+        data: responseData,
+        headers: responseHeaders,
+      } as unknown as AxiosResponse;
+
+      const stateBeforeRequest = {
+        accountLimitState: [],
+        ipLimitState: [],
+        accountLimit: [],
+        ipLimit: [],
+      };
+
+      const updatedState = poeTradeFetch._updateRateLimits(axiosResponse, stateBeforeRequest);
+
+      expect(updatedState.accountLimitState).toEqual([[1, 5, 0]]);
+      expect(updatedState.ipLimitState).toEqual([
         [1, 10, 0],
         [0, 60, 26],
         [92, 300, 1530],
       ]);
+      expect(updatedState.accountLimit).toEqual([[3, 5, 60]]);
+      expect(updatedState.ipLimit).toEqual([
+        [8, 10, 60],
+        [15, 60, 120],
+        [60, 300, 1800],
+      ]);
     });
   });
+
   describe('PoeTradeFetch axios request Interceptor', () => {
     // Тест для інтерцептора запитів
     it('should delay requests when rate limits are exceeded for both account and IP', async () => {
@@ -161,18 +184,15 @@ describe('PoeTradeFetch', () => {
           { result: [] },
           { 'X-Rate-Limit-Account-State': '1:5:0', 'X-Rate-Limit-Ip-State': '1:10:0,0:60:26,92:300:1530' },
         );
-      poeTradeFetch.firstRequestStateLimit.accountLimitState = [
-        [1, 4, 12],
-        [1, 12, 25],
-      ];
+      poeTradeFetch.firstRequestStateLimit.accountLimitState = [[1, 4, 12]];
       poeTradeFetch.firstRequestStateLimit.ipLimitState = [
         [1, 10, 0],
         [59, 60, 26],
         [92, 300, 1530],
       ];
       const mockDelay = jest.spyOn(util, 'delay').mockResolvedValue();
-      await poeTradeFetch.axiosInstance.get('http://test.kek');
-      expect(mockDelay).toBeCalledWith(26);
+      await poeTradeFetch.axiosInstance.get('https://www.pathofexile.com/api/trade/search/:realm/:league');
+      expect(mockDelay).toBeCalledWith(120);
       expect(mockDelay).toBeCalledTimes(2);
     });
   });

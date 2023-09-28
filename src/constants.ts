@@ -35,6 +35,6 @@ export const REALMS = {
 // Default config for PoeTradeApi
 export const DEFAULT_CONFIG = {
   leagueName: LEAGUES_NAMES.Standard,
-  userAgent: 'PoE Trade Fetch https://github.com/Letale-vc/poe-trade-fetch',
+  userAgent: 'poe-trade-fetch',
   realm: REALMS.pc,
 } as const;
