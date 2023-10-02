@@ -24,8 +24,8 @@ jobs:
       - name: Run tests
         run: npm test
 
-      -name: build
+      - name: build
         run: npm run build
 
-      -name: published
+      - name: published
         run: npm run semantic-release
