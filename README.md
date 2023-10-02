@@ -4,10 +4,7 @@ PoE Trade Fetch is a JavaScript library for interacting with the "Path of Exile"
 
 ## Key Features
 
-- Retrieve a list of available in-game leagues.
-- Fetch information about in-game items.
-- Search for items on the PoE trade platform using a URL.
-- Make API requests to fetch detailed data about items.
+- Search for items on the PoE trade platform.
 
 ## Installation
 
@@ -29,7 +26,7 @@ import { PoeTradeFetch,LEAGUES_NAMES } from 'poe-trade-fetch';
     userAgent: 'My PoE App  your@mail.kek',
     realm: REALMS.pc, // Realm (default is pc)
   });
-  await poeTradeFetch.update({});
+  await poeTradeFetch.update();
 
   // Use the API to fetch data (example)
   const tradeUrl = new URL('https://www.pathofexile.com/trade/search/Ancestor/EGmMQEKS5');

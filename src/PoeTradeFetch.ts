@@ -219,7 +219,7 @@ export class PoeTradeFetch {
   async poeTradeSearchUrl(url: URL, poesessid: string) {
     const queryId = this.getQueryIdInTradeUrl(url);
     const page = await this.getTradePage(queryId, poesessid);
-    const requestBody = this.getRequestBody(page);
+    const requestBody = this._createRequestBody(page);
     const { result } = await this.firsRequest(requestBody);
     // Вибираємо перші 10 ідентифікаторів з результату першого запиту і передаємо їх у другий запит
     const identifiers = result.length > 10 ? result.slice(0, 10) : result;
@@ -244,7 +244,7 @@ export class PoeTradeFetch {
   }
 
   // Отримання об'єкту тіла запиту для першого запиту
-  getRequestBody(page: string): RequestBodyType {
+  _createRequestBody(page: string): RequestBodyType {
     const pageState = this._getPoeTradePageState(page);
     return {
       query: pageState,

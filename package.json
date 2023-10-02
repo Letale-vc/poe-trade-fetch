@@ -1,9 +1,19 @@
 {
   "name": "poe-trade-fetch",
-  "version": "0.0.22",
+  "version": "0.0.23-semantic-release",
   "description": "poe trade fetch",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "release": {
+    "branches": ["master"],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "npm run prebuild && tsc",
@@ -11,11 +21,11 @@
     "format": "eslint src/**/*.ts --fix",
     "test": "jest",
     "pub": "npm run build && npm publish",
-    "release": "release-it"
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Letale-vc/poe-trade-fetch.git"
+    "url": "https://github.com/Letale-vc/poe-trade-fetch.git"
   },
   "keywords": [
     "Path of Exile",
@@ -32,6 +42,11 @@
     "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^11.0.0",
+    "@semantic-release/github": "^9.2.1",
+    "@semantic-release/npm": "^11.0.0",
+    "@semantic-release/release-notes-generator": "^12.0.0",
     "@types/jest": "^29.5.5",
     "@types/node": "^20.6.3",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
@@ -42,14 +57,9 @@
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.7.0",
     "prettier": "^3.0.3",
-    "release-it": "^16.2.1",
     "rimraf": "^5.0.4",
+    "semantic-release": "^22.0.5",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
-  },
-  "release-it": {
-    "github": {
-      "release": true
-    }
   }
 }
