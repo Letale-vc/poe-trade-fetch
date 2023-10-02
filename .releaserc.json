@@ -1,6 +1,5 @@
 {
     "branches":[
-      "main",
       "master"
     ],
     "ci":false,
@@ -21,12 +20,6 @@
             {"tag": "style", "release": "patch"},
             {"tag": "test", "release": false}
           ]
-        }
-      ],
-      [
-        "@semantic-release/release-notes-generator",
-        {
-          "preset":"ESLint"
         }
       ],
       [
