@@ -1,5 +1,5 @@
 export interface RequestBodyType {
-  query?: QueryType;
+  query: QueryType;
   sort?: SortType;
 }
 export interface SortType {
