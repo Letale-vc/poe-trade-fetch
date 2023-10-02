@@ -6,8 +6,6 @@ import { LEAGUES_NAMES, REALMS } from './constants';
 import { readFileSync } from 'fs';
 import { RequestBodyType } from './Types/TradeRequestBodyType';
 import MockAdapter from 'axios-mock-adapter';
-import * as util from './Helpers/Utils';
-import { AxiosResponse } from 'axios';
 
 describe('PoeTradeFetch', () => {
   let poeTradeFetch: PoeTradeFetch;
@@ -17,7 +15,7 @@ describe('PoeTradeFetch', () => {
     jest.resetAllMocks();
     poeTradeFetch = new PoeTradeFetch();
     await poeTradeFetch.update();
-    mockAxios = new MockAdapter(poeTradeFetch.axiosInstance);
+    mockAxios = new MockAdapter(poeTradeFetch.axiosInstance.axiosInstance);
   });
   afterEach(() => {
     mockAxios.reset();
@@ -134,115 +132,30 @@ describe('PoeTradeFetch', () => {
     });
   });
 
-  describe('PoeTradeFetch axios Response Interceptor', () => {
-    it('should update accountLimitState, ipLimitState, accountLimit, and ipLimit based on response headers', async () => {
-      const responseHeaders = {
-        'x-rate-limit-account-state': '1:5:0',
-        'x-rate-limit-account': '3:5:60',
-        'x-rate-limit-ip-state': '1:10:0,0:60:26,92:300:1530',
-        'x-rate-limit-ip': '8:10:60,15:60:120,60:300:1800',
-      };
-      const responseData = {
-        result: [],
-      };
-
-      const axiosResponse = {
-        data: responseData,
-        headers: responseHeaders,
-      } as unknown as AxiosResponse;
-
-      const stateBeforeRequest = {
-        accountLimitState: [],
-        ipLimitState: [],
-        accountLimit: [],
-        ipLimit: [],
-      };
-
-      const updatedState = poeTradeFetch._updateRateLimits(axiosResponse, stateBeforeRequest);
-
-      expect(updatedState.accountLimitState).toEqual([[1, 5, 0]]);
-      expect(updatedState.ipLimitState).toEqual([
-        [1, 10, 0],
-        [0, 60, 26],
-        [92, 300, 1530],
-      ]);
-      expect(updatedState.accountLimit).toEqual([[3, 5, 60]]);
-      expect(updatedState.ipLimit).toEqual([
-        [8, 10, 60],
-        [15, 60, 120],
-        [60, 300, 1800],
-      ]);
+  describe('getTradePage', () => {
+    test('should make a trade search URL request, and take data', async () => {
+      const pathTestPage = resolve('tests/MockPage.html');
+      const testPage = readFileSync(pathTestPage, 'utf-8');
+      mockAxios.onAny().reply(200, testPage);
+      const result = await poeTradeFetch.getTradePage('testId', 'testPoesessid');
+      expect(result).toEqual(testPage);
     });
   });
-
-  describe('PoeTradeFetch axios request Interceptor', () => {
-    // Тест для інтерцептора запитів
-    // it('should delay requests when rate limits are exceeded for both account and IP', async () => {
-    //   const initState = [
-    //     [0, 10, 0],
-    //     [0, 60, 0],
-    //     [0, 300, 0],
-    //   ];
-    //   const mockDelay = jest.spyOn(util, 'delay').mockResolvedValue();
-    //   for (let i = 0; i < initState[1][1]; i++) {
-    //     if (i === 60) {
-    //       console.log('kek'); //?
-    //     }
-    //     const limit = initState
-    //       .map((el) => {
-    //         const array = el.map((el, index) => (index === 0 ? i : el));
-    //         return array.join(':');
-    //       })
-    //       .join(',');
-
-    //     const test = mockAxios
-    //       .onAny()
-    //       .reply(
-    //         200,
-    //         { result: [] },
-    //         { 'x-rate-limit-ip': '8:10:60,15:60:120,60:300:1800', 'x-rate-limit-ip-state': limit },
-    //       );
-    //     await poeTradeFetch.axiosInstance.post('https://www.pathofexile.com/api/trade/search/Ancestor');
-    //     test.resetHandlers();
-    //   }
-
-    //   const waitTime2 =
-    //     poeTradeFetch.firstRequestStateLimit.ipLimit[0][1] / poeTradeFetch.firstRequestStateLimit.ipLimit[0][0];
-    //   const waitTime3 =
-    //     poeTradeFetch.firstRequestStateLimit.ipLimit[1][1] / poeTradeFetch.firstRequestStateLimit.ipLimit[1][0];
-    //   // expect(mockDelay).toHaveBeenCalledWith(waitTime1);
-    //   expect(mockDelay).toHaveBeenCalledWith(waitTime2);
-    //   expect(mockDelay).toHaveBeenCalledWith(waitTime3);
-    //   expect(mockDelay).toBeCalledTimes(52);
-    // });
-    it('should delay requests when rate limits are exceeded for both account and IP', async () => {
-      const initState = [
-        [5, 10, 0],
-        [14, 60, 0],
-        [0, 300, 0],
-      ];
-      poeTradeFetch.firstRequestStateLimit.ipLimitState = initState;
-      const mockDelay = jest.spyOn(util, 'delay').mockResolvedValue();
-      const limit = initState
-        .map((el) => {
-          const array = el.map((el) => el);
-          return array.join(':');
-        })
-        .join(',');
-
-      mockAxios
-        .onAny()
-        .reply(
-          200,
-          { result: [] },
-          { 'x-rate-limit-ip': '8:10:60,15:60:120,60:300:1800', 'x-rate-limit-ip-state': limit },
-        );
-      await poeTradeFetch.axiosInstance.post('https://www.pathofexile.com/api/trade/search/Ancestor');
-
-      const waitTime3 =
-        poeTradeFetch.firstRequestStateLimit.ipLimit[1][1] / poeTradeFetch.firstRequestStateLimit.ipLimit[1][0];
-      expect(mockDelay).toHaveBeenCalledWith(waitTime3);
-      expect(mockDelay).toBeCalledTimes(1);
+  describe('secondRequest', () => {
+    test('should be return date', async () => {
+      const dataMock = { result: [] };
+      mockAxios.onAny().reply(200, dataMock);
+      const result = await poeTradeFetch.secondRequest(['testId', 'testId'], 'kekId');
+      expect(result).toEqual(dataMock);
+    });
+  });
+  describe('firstRequest', () => {
+    test('should be return date', async () => {
+      const dataMock = { result: [] };
+      const requestBodyMock: RequestBodyType = { query: {} };
+      mockAxios.onAny().reply(200, dataMock);
+      const result = await poeTradeFetch.firsRequest(requestBodyMock);
+      expect(result).toEqual(dataMock);
     });
   });
 });

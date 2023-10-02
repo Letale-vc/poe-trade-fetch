@@ -1,11 +1,9 @@
-import axios, { AxiosInstance, AxiosResponse, CreateAxiosDefaults } from 'axios';
 import {
   PoeFirstResponseType,
   PoeSecondResponseType,
   PoeTradeDataItemsResponseType,
   ResponseLeagueListType,
 } from './Types/PoeResponseType';
-import { delay } from './Helpers';
 import {
   DEFAULT_CONFIG,
   LEAGUES_NAMES,
@@ -16,134 +14,23 @@ import {
   POE_SEARCH_PAGE_URL,
   REALMS,
 } from './constants';
-import { ConfigInputType, PoeTradeFetchConfigType, RateStateLimitType } from './Types/types';
+import { ConfigInputType, PoeTradeFetchConfigType } from './Types/types';
 import * as cheerio from 'cheerio';
 import { QueryType, RequestBodyType } from './Types/TradeRequestBodyType';
+import { HTTPRequest } from './HTTPRequest';
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
   leagueName: string = '';
   config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
-  axiosInstance: AxiosInstance;
-  // state rate limit
-  firstRequestStateLimit = {
-    accountLimit: [[3, 5, 60]],
-    accountLimitState: [[0, 5, 0]],
-    ipLimit: [
-      [8, 10, 60],
-      [15, 60, 120],
-      [60, 300, 1800],
-    ],
-    ipLimitState: [
-      [0, 10, 0],
-      [0, 60, 0],
-      [0, 300, 0],
-    ],
-  };
-  secondRequestStateLimit = {
-    accountLimit: [[6, 4, 10]],
-    accountLimitState: [[0, 4, 0]],
-    ipLimit: [
-      [12, 4, 60],
-      [16, 12, 60],
-    ],
-    ipLimitState: [
-      [0, 4, 0],
-      [0, 12, 0],
-    ],
-  };
-  otherRequestLimit: RateStateLimitType = {
-    accountLimit: [],
-    accountLimitState: [],
-    ipLimit: [],
-    ipLimitState: [],
-  };
+  axiosInstance: HTTPRequest;
+
   constructor(config: ConfigInputType = {}) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
     this.config = { ...this.config, ...config };
-    this.axiosInstance = this._createAxiosInstance();
-    // Додавання перехоплювача запитів для затримки перед кожним запитом
-    this._setupRequestInterceptors();
-    // Перехоплювач відповідей для оновлення стану обмежень на основі заголовків відповідей
-    this._setupResponseInterceptors();
+    this.axiosInstance = new HTTPRequest(this.config.userAgent);
   }
   // constructor END
-
-  _createAxiosInstance(): AxiosInstance {
-    const axiosConfig: CreateAxiosDefaults = {
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': this.config.userAgent,
-        access: '*/*',
-      },
-    };
-    return axios.create(axiosConfig);
-  }
-  async _rateLimitCheck(state: RateStateLimitType) {
-    const checkState = async (rateLimitState: Array<number[]>, limit: Array<number[]>) => {
-      const { waitTime, violated } = rateLimitState.reduce(
-        (acc, [current, period], index) => {
-          const [maxHits] = limit[index];
-          const checkViolated = current >= maxHits / 2;
-          const newWaitTime = period / maxHits;
-          return {
-            waitTime: checkViolated ? newWaitTime : acc.waitTime,
-            violated: checkViolated ? checkViolated : acc.violated,
-          };
-        },
-        { waitTime: 0, violated: false },
-      );
-      if (violated) await delay(waitTime);
-    };
-
-    await Promise.all([
-      checkState(state.accountLimitState, state.accountLimit),
-      checkState(state.ipLimitState, state.ipLimit),
-    ]);
-  }
-  _setupRequestInterceptors() {
-    this.axiosInstance.interceptors.request.use(async (config) => {
-      if (config.url && config.url.includes(POE_API_SECOND_REQUEST)) {
-        await this._rateLimitCheck(this.secondRequestStateLimit);
-      } else if (config.url && config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
-        await this._rateLimitCheck(this.firstRequestStateLimit);
-      } else {
-        this._rateLimitCheck(this.otherRequestLimit);
-      }
-      return config;
-    });
-  }
-  _updateRateLimits(res: AxiosResponse, state: RateStateLimitType): RateStateLimitType {
-    const headers = res.headers;
-    const updatedState: RateStateLimitType = { ...state };
-    const headerMappings: Record<string, keyof RateStateLimitType> = {
-      'x-rate-limit-account-state': 'accountLimitState',
-      'x-rate-limit-account': 'accountLimit',
-      'x-rate-limit-ip-state': 'ipLimitState',
-      'x-rate-limit-ip': 'ipLimit',
-    };
-    for (const header in headerMappings) {
-      if (headers[header]) {
-        updatedState[headerMappings[header]] = headers[header]
-          .split(',')
-          .map((el: string) => el.split(':').map(Number));
-      }
-    }
-    return updatedState;
-  }
-  _setupResponseInterceptors() {
-    this.axiosInstance.interceptors.response.use((res) => {
-      if (res.config.url && res.config.url.includes(POE_API_SECOND_REQUEST)) {
-        this.secondRequestStateLimit = this._updateRateLimits(res, this.secondRequestStateLimit);
-      } else if (res.config.url && res.config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
-        this.firstRequestStateLimit = this._updateRateLimits(res, this.firstRequestStateLimit);
-      } else {
-        this.otherRequestLimit = this._updateRateLimits(res, this.otherRequestLimit);
-      }
-
-      return res;
-    });
-  }
 
   // Метод для оновлення конфігурації
   async update(config: ConfigInputType = {}) {
@@ -165,13 +52,12 @@ export class PoeTradeFetch {
       PoeTradeFetch.instance = new PoeTradeFetch(config);
       await PoeTradeFetch.instance.update();
     }
-
     return PoeTradeFetch.instance;
   }
 
   // Метод для отримання списку доступних ліг
   async leagueNames() {
-    return (await this.axiosInstance.get<ResponseLeagueListType>(POE_API_TRADE_DATA_LEAGUES_URL)).data.result;
+    return (await this.axiosInstance.get<ResponseLeagueListType>(POE_API_TRADE_DATA_LEAGUES_URL)).result;
   }
 
   // Метод для отримання назви поточної ліги
@@ -188,31 +74,30 @@ export class PoeTradeFetch {
 
   // Метод для отримання інформації про предмети
   async tradeDataItems() {
-    return (await this.axiosInstance.get<PoeTradeDataItemsResponseType>(POE_API_TRADE_DATA_ITEMS_URL)).data;
+    return await this.axiosInstance.get<PoeTradeDataItemsResponseType>(POE_API_TRADE_DATA_ITEMS_URL);
   }
 
   // Перший запит, щоб отримати ідентифікатори предметів, розташованих на торгівельній платформі
   async firsRequest(requestQuery: RequestBodyType) {
     // Додаємо лігу до URL
-    let url = POE_API_FIRST_REQUEST.replace(':league', this.leagueName);
+    let path = POE_API_FIRST_REQUEST.replace(':league', this.leagueName);
     // Замінюємо :realm на значення конфігурації realm для не-PC реалмів
-    url = this.config.realm === REALMS.pc ? url.replace('/:realm', '') : url.replace(':realm', this.config.realm);
-    return (await this.axiosInstance.post<PoeFirstResponseType>(url, requestQuery)).data;
+    path = this.config.realm === REALMS.pc ? path.replace('/:realm', '') : path.replace(':realm', this.config.realm);
+    return await this.axiosInstance.post<PoeFirstResponseType>(path, requestQuery);
   }
 
   // Другий запит, для отримання інформації про предмети за їх ідентифікаторами
   async secondRequest(arrayIds: string[], queryId: string) {
-    const baseUrl = POE_API_SECOND_REQUEST;
-    const url = new URL(baseUrl);
+    let basePath = POE_API_SECOND_REQUEST;
     // Додаємо список ідентифікаторів до URL
-    url.pathname += arrayIds.join(',');
+    basePath += arrayIds.join(',');
     // Додаємо параметр запиту queryId
-    url.searchParams.set('query', queryId);
+    basePath += `?query=${queryId}`;
     // Додаємо параметр realm, якщо це не PC
     if (this.config.realm !== REALMS.pc) {
-      url.searchParams.set('realm', this.config.realm);
+      basePath += `&realm=${this.config.realm}`;
     }
-    return (await this.axiosInstance.get<PoeSecondResponseType>(url.toString())).data;
+    return await this.axiosInstance.get<PoeSecondResponseType>(basePath);
   }
 
   // Метод для пошуку по URL торгівельної платформи PoE
@@ -229,11 +114,9 @@ export class PoeTradeFetch {
   // Метод для отримання сторінки торгівлі за її ідентифікатором
   async getTradePage(queryId: string, poesessid: string) {
     const baseUrl = POE_SEARCH_PAGE_URL;
-    const addLeagueUrl = baseUrl.replace(':league', this.leagueName);
-    const addQueryId = addLeagueUrl.replace(':id', queryId);
-    const url = new URL(addQueryId);
-    return (await this.axiosInstance.get<string>(url.toString(), { headers: { Cookie: `POESESSID=${poesessid}` } }))
-      .data;
+    const addLeaguePath = baseUrl.replace(':league', this.leagueName);
+    const addIdPath = addLeaguePath.replace(':id', queryId);
+    return await this.axiosInstance.get<string>(addIdPath, { headers: { Cookie: `POESESSID=${poesessid}` } });
   }
 
   // Розділення URL на частини та отримання ідентифікатора запиту
