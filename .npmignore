@@ -8,6 +8,7 @@ package-lock.json
 .eslintrc.js
 jest.config.json
 .prettierrc.json
+.releaserc.json
 .gitignore
 .github
 # me ignores
