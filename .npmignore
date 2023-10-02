@@ -9,6 +9,7 @@ package-lock.json
 jest.config.json
 .prettierrc.json
 .gitignore
+.github
 # me ignores
 yran.lock
 package-lock.json
