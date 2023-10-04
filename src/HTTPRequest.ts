@@ -105,7 +105,7 @@ export class HTTPRequest {
       if (res.config.url) {
         if (res.config.url.includes(POE_API_SECOND_REQUEST)) {
           requestKey = POE_API_SECOND_REQUEST;
-        } else if (res.config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
+        } else if (res.config.url.includes(POE_API_FIRST_REQUEST.replace(':realm/:league', ''))) {
           requestKey = POE_API_FIRST_REQUEST;
         }
       }
