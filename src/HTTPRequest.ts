@@ -32,7 +32,7 @@ export class HTTPRequest {
     };
     return axios.create(axiosConfig);
   }
-  _delay(seconds = 10) {
+  async _delay(seconds = 10) {
     const timeInMilliseconds = seconds * 1200;
     return new Promise<void>((resolve) => {
       setTimeout(resolve, timeInMilliseconds);
@@ -72,11 +72,11 @@ export class HTTPRequest {
       if (config.url) {
         if (config.url.includes(POE_API_SECOND_REQUEST)) {
           requestKey = POE_API_SECOND_REQUEST;
-        } else if (config.url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
+        } else if (config.url.includes(POE_API_FIRST_REQUEST.replace(':realm/:league', ''))) {
           requestKey = POE_API_FIRST_REQUEST;
         }
       }
-      this._rateLimitCheck(this._requestStateRateLimits[requestKey]);
+      await this._rateLimitCheck(this._requestStateRateLimits[requestKey]);
       return config;
     });
   }
