@@ -1,6 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import { AxiosResponse } from 'axios';
 import { HTTPRequest } from './HTTPRequest';
+import { POE_API_BASE_URL, POE_API_TRADE_DATA_LEAGUES_URL } from './constants';
 
 describe('PoeTradeFetch', () => {
   let axiosInstance: HTTPRequest;
@@ -93,6 +94,38 @@ describe('PoeTradeFetch', () => {
       const waitTime3 = 60 / 15;
       expect(mockDelay).toHaveBeenCalledWith(waitTime3);
       expect(mockDelay).toBeCalledTimes(1);
+    });
+  });
+
+  describe('get', () => {
+    it('should be correct url', async () => {
+      const initState = [
+        [5, 10, 0],
+        [14, 60, 0],
+        [0, 300, 0],
+      ];
+      //   axiosInstance._requestStateRateLimits[POE_API_SECOND_REQUEST].ipLimitState = initState;
+
+      const limit = initState
+        .map((el) => {
+          const array = el.map((el) => el);
+          return array.join(':');
+        })
+        .join(',');
+      const test = mockAxios.onGet().reply(
+        200,
+        { result: [] },
+        {
+          'x-rate-limit-ip': '8:10:60,15:60:120,60:300:1800',
+          'x-rate-limit-ip-state': limit,
+          'x-rate-account-ip': '3:5:60',
+          'x-rate-account-ip-state': [0, 5, 0],
+        },
+      );
+
+      await axiosInstance.get(POE_API_TRADE_DATA_LEAGUES_URL);
+      expect(test.history.get[0].baseURL).toBe(POE_API_BASE_URL);
+      expect(test.history.get[0].url).toBe(POE_API_TRADE_DATA_LEAGUES_URL);
     });
   });
 });

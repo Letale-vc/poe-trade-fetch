@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, CreateAxiosDefaults } from 'axios';
 import { RateStateLimitType } from './Types/types';
-import { POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, RATE_LIMIT_STATE_KEYS } from './constants';
+import { POE_API_BASE_URL, POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, RATE_LIMIT_STATE_KEYS } from './constants';
 
 export class HTTPRequest {
   axiosInstance: AxiosInstance;
@@ -23,6 +23,7 @@ export class HTTPRequest {
 
   _createAxiosInstance(userAgent: string): AxiosInstance {
     const axiosConfig: CreateAxiosDefaults = {
+      baseURL: POE_API_BASE_URL,
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': userAgent,
