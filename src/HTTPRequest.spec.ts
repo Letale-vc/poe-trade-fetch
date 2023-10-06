@@ -37,14 +37,7 @@ describe('PoeTradeFetch', () => {
         headers: responseHeaders,
       } as unknown as AxiosResponse;
 
-      const stateBeforeRequest = {
-        accountLimitState: [],
-        ipLimitState: [],
-        accountLimit: [],
-        ipLimit: [],
-      };
-
-      const updatedState = axiosInstance._updateRateLimits(axiosResponse, stateBeforeRequest);
+      const updatedState = axiosInstance._updateRateLimits(axiosResponse);
 
       expect(updatedState.accountLimitState).toEqual([[1, 5, 0]]);
       expect(updatedState.ipLimitState).toEqual([
@@ -65,11 +58,9 @@ describe('PoeTradeFetch', () => {
     it('should delay requests when rate limits are exceeded for both account and IP', async () => {
       const initState = [
         [5, 10, 0],
-        [14, 60, 0],
+        [15, 60, 0],
         [0, 300, 0],
       ];
-      //   axiosInstance._requestStateRateLimits[POE_API_SECOND_REQUEST].ipLimitState = initState;
-      const mockDelay = jest.spyOn(axiosInstance, '_delay').mockResolvedValue();
       const limit = initState
         .map((el) => {
           const array = el.map((el) => el);
@@ -89,11 +80,9 @@ describe('PoeTradeFetch', () => {
       );
 
       await axiosInstance.axiosInstance.post('https://www.pathofexile.com/api/trade/search/Ancestor');
-      await axiosInstance.axiosInstance.post('https://www.pathofexile.com/api/trade/search/Ancestor');
-
-      const waitTime3 = 60 / 15;
-      expect(mockDelay).toHaveBeenCalledWith(waitTime3);
-      expect(mockDelay).toBeCalledTimes(1);
+      await expect(
+        axiosInstance.axiosInstance.post('https://www.pathofexile.com/api/trade/search/Ancestor'),
+      ).rejects.toThrow('Rate limit exceeded');
     });
   });
 

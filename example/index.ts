@@ -1,23 +1,4 @@
-# PoE Trade Fetch
-
-PoE Trade Fetch is a JavaScript library for interacting with the "Path of Exile" (PoE) in-game trading platform API. It allows you to retrieve item information.
-
-## Key Features
-
-- Perform a search for items on the PoE Trade API.
-
-## Installation
-
-You can install PoE Trade Fetch via npm:
-
-```bash
-npm install poe-trade-fetch
-```
-
-## Usage
-
-```javascript
-import { LEAGUES_NAMES, RATE_LIMIT_STATE_KEYS, REALMS, PoeTradeFetch, RequestBodyType } from 'poe-trade-fetch';
+import { LEAGUES_NAMES, RATE_LIMIT_STATE_KEYS, REALMS, PoeTradeFetch, RequestBodyType } from '../src';
 
 const poeTradeFetch = new PoeTradeFetch({
   leagueName: LEAGUES_NAMES.Current, // League name (default is 'Standard')
@@ -40,13 +21,12 @@ console.log('Trade Data Items:', tradeDataItems.result);
 // You can also set  POESESSID, this will increase the number of requests per minute.
 // You also need to understand that different rate limits are possible for different API urls
 
-const poeTradeFetch = new PoeTradeFetch({
-  leagueName: LEAGUES_NAMES.Current, // League name (default is 'Standard')
+await poeTradeFetch.update({
+  leagueName: LEAGUES_NAMES.Current,
   userAgent: 'My PoE App  your@mail.kek',
-  realm: REALMS.pc, // Realm (default is pc)
+  realm: REALMS.pc,
   POESESSID: 'Your POESESSID',
 });
-await poeTradeFetch.update();
 
 const firstDelay = poeTradeFetch.httpRequest.getWaitTime(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
 await poeTradeFetch.httpRequest.delay(firstDelay);
@@ -64,14 +44,14 @@ const RequestBody: RequestBodyType = {
 const { result, id } = await poeTradeFetch.firsRequest(RequestBody);
 // You take something like this response
 // {
-//  "id": "prX3f0",
-//  "complexity": 6,
-//  "result": [
-//   "9b09e2b621794cd73804a1c27c3ab817b8d6467efdac1ec406944ca47c0324e7",
-//   "7015ff5aad7940c0ca3b5ff76d1444c9ae3321ac3f7944a3ee5eedcf8349beba",
+// 	"id": "prX3f0",
+// 	"complexity": 6,
+// 	"result": [
+// 		"9b09e2b621794cd73804a1c27c3ab817b8d6467efdac1ec406944ca47c0324e7",
+// 		"7015ff5aad7940c0ca3b5ff76d1444c9ae3321ac3f7944a3ee5eedcf8349beba",
 //      ...  another ids
-//  ],
-//  "total": 2053
+// 	],
+// 	"total": 2053
 // }
 // if you give more than 10 IDs, the PoE API will give an error
 const identifiers = result.length > 10 ? result.slice(0, 10) : result;
@@ -84,9 +64,3 @@ const { result: secondResult } = await poeTradeFetch.secondRequest(identifiers, 
 console.log('Trade Data Items:', secondResult);
 const numberPrice = secondResult[0].listing.price.amount;
 const currencyPrice = secondResult[0].listing.price.currency;
-
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

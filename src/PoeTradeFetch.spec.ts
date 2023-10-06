@@ -15,7 +15,7 @@ describe('PoeTradeFetch', () => {
     jest.resetAllMocks();
     poeTradeFetch = new PoeTradeFetch();
     await poeTradeFetch.update();
-    mockAxios = new MockAdapter(poeTradeFetch.axiosInstance.axiosInstance);
+    mockAxios = new MockAdapter(poeTradeFetch.httpRequest.axiosInstance);
   });
   afterEach(() => {
     mockAxios.reset();
@@ -33,6 +33,7 @@ describe('PoeTradeFetch', () => {
         userAgent: 'test',
         leagueName: LEAGUES_NAMES.Hardcore,
         realm: REALMS.pc,
+        POESESSID: 'test',
       };
       jest.spyOn(poeTradeFetch, 'getCurrentLeagueName').mockResolvedValue('test');
       await poeTradeFetch.update(config);
@@ -44,6 +45,7 @@ describe('PoeTradeFetch', () => {
         userAgent: 'test',
         leagueName: LEAGUES_NAMES.Current,
         realm: REALMS.pc,
+        POESESSID: 'test',
       };
       jest.spyOn(poeTradeFetch, 'getCurrentLeagueName').mockResolvedValue('test');
       await poeTradeFetch.update(config);

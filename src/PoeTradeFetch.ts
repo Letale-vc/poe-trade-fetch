@@ -18,31 +18,35 @@ import { ConfigInputType, PoeTradeFetchConfigType } from './Types/types';
 import * as cheerio from 'cheerio';
 import { QueryType, RequestBodyType } from './Types/TradeRequestBodyType';
 import { HTTPRequest } from './HTTPRequest';
+import { AxiosRequestConfig } from 'axios';
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
   leagueName: string = '';
   config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
-  axiosInstance: HTTPRequest;
+  httpRequest: HTTPRequest;
 
   constructor(config: ConfigInputType = {}) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
     this.config = { ...this.config, ...config };
-    this.axiosInstance = new HTTPRequest(this.config.userAgent);
+    this.httpRequest = new HTTPRequest(this.config.userAgent);
   }
   // constructor END
 
   // Метод для оновлення конфігурації
   async update(config: ConfigInputType = {}) {
     this.config = { ...this.config, ...config };
+    let leagueName: string = this.config.leagueName;
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
       const currentLeagueName = await this.getCurrentLeagueName();
-      this.leagueName = !currentLeagueName
+      leagueName = !currentLeagueName
         ? LEAGUES_NAMES.Standard
         : this.config.leagueName.replace(LEAGUES_NAMES.Current, currentLeagueName);
-      return;
     }
-    this.leagueName = this.config.leagueName;
+    this.leagueName = leagueName;
+    this.httpRequest.axiosInstance.defaults.headers.common['Cookie'] = this.config.POESESSID
+      ? `POESESSID=${this.config.POESESSID}`
+      : '';
   }
 
   // Метод для отримання єдиного екземпляра класу
@@ -57,7 +61,7 @@ export class PoeTradeFetch {
 
   // Метод для отримання списку доступних ліг
   async leagueNames() {
-    return (await this.axiosInstance.get<ResponseLeagueListType>(POE_API_TRADE_DATA_LEAGUES_URL)).result;
+    return (await this.httpRequest.get<ResponseLeagueListType>(POE_API_TRADE_DATA_LEAGUES_URL)).result;
   }
 
   // Метод для отримання назви поточної ліги
@@ -74,7 +78,7 @@ export class PoeTradeFetch {
 
   // Метод для отримання інформації про предмети
   async tradeDataItems() {
-    return await this.axiosInstance.get<PoeTradeDataItemsResponseType>(POE_API_TRADE_DATA_ITEMS_URL);
+    return await this.httpRequest.get<PoeTradeDataItemsResponseType>(POE_API_TRADE_DATA_ITEMS_URL);
   }
 
   // Перший запит, щоб отримати ідентифікатори предметів, розташованих на торгівельній платформі
@@ -83,7 +87,7 @@ export class PoeTradeFetch {
     let path = POE_API_FIRST_REQUEST.replace(':league', this.leagueName);
     // Замінюємо :realm на значення конфігурації realm для не-PC реалмів
     path = this.config.realm === REALMS.pc ? path.replace('/:realm', '') : path.replace(':realm', this.config.realm);
-    return await this.axiosInstance.post<PoeFirstResponseType>(path, requestQuery);
+    return await this.httpRequest.post<PoeFirstResponseType>(path, requestQuery);
   }
 
   // Другий запит, для отримання інформації про предмети за їх ідентифікаторами
@@ -97,7 +101,7 @@ export class PoeTradeFetch {
     if (this.config.realm !== REALMS.pc) {
       basePath += `&realm=${this.config.realm}`;
     }
-    return await this.axiosInstance.get<PoeSecondResponseType>(basePath);
+    return await this.httpRequest.get<PoeSecondResponseType>(basePath);
   }
 
   // Метод для пошуку по URL торгівельної платформи PoE
@@ -112,11 +116,14 @@ export class PoeTradeFetch {
   }
 
   // Метод для отримання сторінки торгівлі за її ідентифікатором
-  async getTradePage(queryId: string, poesessid: string) {
+  async getTradePage(queryId: string, poesessid?: string) {
     const baseUrl = POE_SEARCH_PAGE_URL;
     const addLeaguePath = baseUrl.replace(':league', this.leagueName);
     const addIdPath = addLeaguePath.replace(':id', queryId);
-    return await this.axiosInstance.get<string>(addIdPath, { headers: { Cookie: `POESESSID=${poesessid}` } });
+    const config: AxiosRequestConfig | undefined = poesessid
+      ? { headers: { Cookie: `POESESSID=${poesessid}` } }
+      : undefined;
+    return await this.httpRequest.get<string>(addIdPath, config);
   }
 
   // Розділення URL на частини та отримання ідентифікатора запиту

@@ -1,24 +1,64 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, CreateAxiosDefaults } from 'axios';
-import { RateStateLimitType } from './Types/types';
+import { RateLimitKeys, RateStateLimitType } from './Types/types';
 import { POE_API_BASE_URL, POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, RATE_LIMIT_STATE_KEYS } from './constants';
 
 export class HTTPRequest {
   axiosInstance: AxiosInstance;
-  _requestStateRateLimits: Record<string, RateStateLimitType> = {};
+  _requestStatesRateLimitsMap = new Map<string, RateStateLimitType>();
+  _lastRequestTimeMap = new Map<string, Date>();
+  _waitTimeMap = new Map<string, number>();
+  getWaitTime(key: RateLimitKeys) {
+    this.updateWaitTime(key);
+    return this._waitTimeMap.get(key) || 0;
+  }
+  updateWaitTime(key: RateLimitKeys) {
+    let waitTime = this._waitTimeMap.get(key) || 0;
+    const dateNow = new Date().getTime();
+    const lastRequestTime = this._lastRequestTimeMap.get(key)?.getDate();
+    const differenceTimeInSec = (dateNow - (lastRequestTime || dateNow)) / 1000;
+    if (waitTime && waitTime !== 0 && differenceTimeInSec >= waitTime) {
+      this._waitTimeMap.set(key, 0);
+      return;
+    }
+    const states = this._requestStatesRateLimitsMap.get(key);
+    if (states !== undefined) {
+      const accWaitTime = this._stateCheck(states.accountLimitState, states.accountLimit);
+      const ipWaitTime = this._stateCheck(states.ipLimitState, states.ipLimit);
+      waitTime = Math.max(accWaitTime, ipWaitTime);
+    }
+    if (differenceTimeInSec !== 0 && differenceTimeInSec <= waitTime) {
+      waitTime = waitTime - differenceTimeInSec;
+    }
+    this._waitTimeMap.set(key, waitTime);
+  }
+  isRequestAllowed(key: RateLimitKeys) {
+    return this.getWaitTime(key) === 0 ? true : false;
+  }
 
+  _stateCheck(limitState: Array<number[]>, limit: Array<number[]>) {
+    return limitState.reduce((acc, [current, period], index) => {
+      let time = acc;
+      const [maxHits] = limit[index];
+      const checkViolated = current >= maxHits;
+      if (checkViolated && acc < period) {
+        time = period;
+      }
+      return time;
+    }, 0);
+  }
   constructor(userAgent: string) {
     this.axiosInstance = this._createAxiosInstance(userAgent);
     this._setupRequestInterceptors();
     this._setupResponseInterceptors();
-
-    RATE_LIMIT_STATE_KEYS.forEach((el) => {
-      this._requestStateRateLimits[el] = {
+    for (const value in RATE_LIMIT_STATE_KEYS as Record<string, RateLimitKeys>) {
+      this._waitTimeMap.set(value, 0);
+      this._requestStatesRateLimitsMap.set(value, {
         accountLimitState: [],
         ipLimitState: [],
         accountLimit: [],
         ipLimit: [],
-      };
-    });
+      });
+    }
   }
 
   _createAxiosInstance(userAgent: string): AxiosInstance {
@@ -32,57 +72,31 @@ export class HTTPRequest {
     };
     return axios.create(axiosConfig);
   }
-  async _delay(seconds = 10) {
-    const timeInMilliseconds = seconds * 1200;
+  async delay(seconds = 10) {
+    const timeInMilliseconds = seconds * 1000;
     return new Promise<void>((resolve) => {
       setTimeout(resolve, timeInMilliseconds);
     });
   }
 
-  _stateCheck(rateLimitState: Array<number[]>, limit: Array<number[]>) {
-    return rateLimitState.reduce(
-      (acc, [current, period], index) => {
-        const [maxHits] = limit[index];
-        const checkViolated = current >= maxHits / 2;
-        const newWaitTime = period / maxHits;
-        return {
-          waitTime: checkViolated ? newWaitTime : acc.waitTime,
-          violated: checkViolated ? checkViolated : acc.violated,
-        };
-      },
-      { waitTime: 0, violated: false },
-    );
-  }
-
-  async _applyDelayIfViolated(rateLimitState: Array<number[]>, limit: Array<number[]>) {
-    const { waitTime, violated } = this._stateCheck(rateLimitState, limit);
-    if (violated) {
-      await this._delay(waitTime);
-    }
-  }
-  async _rateLimitCheck(state: RateStateLimitType) {
-    await Promise.all([
-      this._applyDelayIfViolated(state.accountLimitState, state.accountLimit),
-      this._applyDelayIfViolated(state.ipLimitState, state.ipLimit),
-    ]);
-  }
   _setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async (config) => {
-      let requestKey = 'other';
-      if (config.url) {
-        if (config.url.includes(POE_API_SECOND_REQUEST)) {
-          requestKey = POE_API_SECOND_REQUEST;
-        } else if (config.url.includes(POE_API_FIRST_REQUEST.replace(':realm/:league', ''))) {
-          requestKey = POE_API_FIRST_REQUEST;
-        }
+      const keyLimit = this._rateLimitKey(config.url);
+      if (!this.isRequestAllowed(keyLimit)) {
+        throw new Error('Rate limit exceeded');
       }
-      await this._rateLimitCheck(this._requestStateRateLimits[requestKey]);
       return config;
     });
   }
 
-  _updateRateLimits(res: AxiosResponse, state: RateStateLimitType): RateStateLimitType {
+  _updateRateLimits(res: AxiosResponse): RateStateLimitType {
     const headers = res.headers;
+    const state = {
+      accountLimitState: [],
+      ipLimitState: [],
+      accountLimit: [],
+      ipLimit: [],
+    };
     const updatedState: RateStateLimitType = { ...state };
     const headerMappings: Record<string, keyof RateStateLimitType> = {
       'x-rate-limit-account-state': 'accountLimitState',
@@ -99,17 +113,22 @@ export class HTTPRequest {
     }
     return updatedState;
   }
+  _rateLimitKey(url: string | undefined): RateLimitKeys {
+    let key = RATE_LIMIT_STATE_KEYS.OTHER;
+    if (url) {
+      if (url.includes(POE_API_SECOND_REQUEST)) {
+        key = RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST;
+      } else if (url.includes(POE_API_FIRST_REQUEST.replace(':realm/:league', ''))) {
+        key = RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST;
+      }
+    }
+    return key;
+  }
   _setupResponseInterceptors() {
     this.axiosInstance.interceptors.response.use((res) => {
-      let requestKey = 'other';
-      if (res.config.url) {
-        if (res.config.url.includes(POE_API_SECOND_REQUEST)) {
-          requestKey = POE_API_SECOND_REQUEST;
-        } else if (res.config.url.includes(POE_API_FIRST_REQUEST.replace(':realm/:league', ''))) {
-          requestKey = POE_API_FIRST_REQUEST;
-        }
-      }
-      this._requestStateRateLimits[requestKey] = this._updateRateLimits(res, this._requestStateRateLimits[requestKey]);
+      const keyLimit = this._rateLimitKey(res.config.url);
+      this._lastRequestTimeMap.set(keyLimit, new Date());
+      this._requestStatesRateLimitsMap.set(keyLimit, this._updateRateLimits(res));
       return res;
     });
   }

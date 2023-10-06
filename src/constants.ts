@@ -38,6 +38,16 @@ export const DEFAULT_CONFIG = {
   leagueName: LEAGUES_NAMES.Standard,
   userAgent: 'poe-trade-fetch',
   realm: REALMS.pc,
+  POESESSID: null,
 } as const;
 
-export const RATE_LIMIT_STATE_KEYS = [POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, 'other'];
+// export const RATE_LIMIT_STATE_KEYS = [POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, 'other'];
+
+export const RATE_LIMIT_STATE_KEYS: Record<
+  string,
+  typeof POE_API_FIRST_REQUEST | typeof POE_API_SECOND_REQUEST | 'OTHER'
+> = {
+  POE_API_FIRST_REQUEST: POE_API_FIRST_REQUEST,
+  POE_API_SECOND_REQUEST: POE_API_FIRST_REQUEST,
+  OTHER: 'OTHER',
+};
