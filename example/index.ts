@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { LEAGUES_NAMES, RATE_LIMIT_STATE_KEYS, REALMS, PoeTradeFetch, RequestBodyType } from '../src';
 
 const poeTradeFetch = new PoeTradeFetch({
@@ -62,5 +63,5 @@ await poeTradeFetch.httpRequest.delay(secondDelay);
 // here you get information about 10 listings on poe trade
 const { result: secondResult } = await poeTradeFetch.secondRequest(identifiers, id);
 console.log('Trade Data Items:', secondResult);
-const numberPrice = secondResult[0].listing.price.amount;
+const amountPrice = secondResult[0].listing.price.amount;
 const currencyPrice = secondResult[0].listing.price.currency;
