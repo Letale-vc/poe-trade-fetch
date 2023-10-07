@@ -50,7 +50,7 @@ export class HTTPRequest {
     this.axiosInstance = this._createAxiosInstance(userAgent);
     this._setupRequestInterceptors();
     this._setupResponseInterceptors();
-    for (const value in RATE_LIMIT_STATE_KEYS as Record<string, RateLimitKeys>) {
+    for (const [_, value] of Object.entries(RATE_LIMIT_STATE_KEYS)) {
       this._waitTimeMap.set(value, 0);
       this._requestStatesRateLimitsMap.set(value, {
         accountLimitState: [],
@@ -116,10 +116,10 @@ export class HTTPRequest {
   _rateLimitKey(url: string | undefined): RateLimitKeys {
     let key = RATE_LIMIT_STATE_KEYS.OTHER;
     if (url) {
-      if (url.includes(POE_API_SECOND_REQUEST)) {
-        key = RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST;
-      } else if (url.includes(POE_API_FIRST_REQUEST.replace(':realm/:league', ''))) {
+      if (url.includes(POE_API_FIRST_REQUEST.replace('/:realm/:league', ''))) {
         key = RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST;
+      } else if (url.includes(POE_API_SECOND_REQUEST)) {
+        key = RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST;
       }
     }
     return key;
