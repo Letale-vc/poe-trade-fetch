@@ -1,17 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LEAGUES_NAMES, RATE_LIMIT_STATE_KEYS, REALMS, PoeTradeFetch, RequestBodyType } from '../src';
+import {
+  LEAGUES_NAMES,
+  RATE_LIMIT_STATE_KEYS,
+  REALMS,
+  PoeTradeFetch,
+  RequestBodyType,
+} from "../src/index.js";
 
 const poeTradeFetch = new PoeTradeFetch({
   leagueName: LEAGUES_NAMES.Current, // League name (default is 'Standard')
-  userAgent: 'My PoE App  your@mail.kek',
+  userAgent: "My PoE App  your@mail.kek",
   realm: REALMS.pc, // Realm (default is pc)
 });
 await poeTradeFetch.update();
 
 // Use the API to fetch data (example)
-const tradeUrl = new URL('https://www.pathofexile.com/trade/search/Ancestor/EGmMQEKS5');
-const tradeDataItems = await poeTradeFetch.poeTradeSearchUrl(tradeUrl, 'Your POESESSID');
-console.log('Trade Data Items:', tradeDataItems.result);
+const tradeUrl = new URL(
+  "https://www.pathofexile.com/trade/search/Ancestor/EGmMQEKS5",
+);
+const tradeDataItems = await poeTradeFetch.poeTradeSearchUrl(
+  tradeUrl,
+  "Your POESESSID",
+);
+console.log("Trade Data Items:", tradeDataItems.result);
 
 // Another example
 // I create a delay before the call, if you don't do the delay after a few requests you will get a RateLimit from the PoE API.
@@ -23,26 +33,28 @@ console.log('Trade Data Items:', tradeDataItems.result);
 // You also need to understand that different rate limits are possible for different API urls
 
 await poeTradeFetch.update({
-  leagueName: LEAGUES_NAMES.Current,
-  userAgent: 'My PoE App  your@mail.kek',
-  realm: REALMS.pc,
-  POESESSID: 'Your POESESSID',
+  leagueName: LEAGUES_NAMES.Current, // default Standard
+  userAgent: "My PoE App  your@mail.kek",
+  realm: REALMS.pc, // if need default pc
+  POESESSID: "Your POESESSID", // if need
 });
 
-const firstDelay = poeTradeFetch.httpRequest.getWaitTime(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
+const firstDelay = poeTradeFetch.httpRequest.getWaitTime(
+  RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
+);
 await poeTradeFetch.httpRequest.delay(firstDelay);
 
 const RequestBody: RequestBodyType = {
   query: {
-    status: { option: 'online' },
-    name: 'Prismweave',
-    type: 'Rustic Sash',
-    stats: [{ type: 'and', filters: [], disabled: false }],
+    status: {option: "online"},
+    name: "Prismweave",
+    type: "Rustic Sash",
+    stats: [{type: "and", filters: [], disabled: false}],
   },
-  sort: { price: 'asc' },
+  sort: {price: "asc"},
 }; // just create you any query
 
-const { result, id } = await poeTradeFetch.firsRequest(RequestBody);
+const {result, id} = await poeTradeFetch.firsRequest(RequestBody);
 // You take something like this response
 // {
 // 	"id": "prX3f0",
@@ -57,11 +69,16 @@ const { result, id } = await poeTradeFetch.firsRequest(RequestBody);
 // if you give more than 10 IDs, the PoE API will give an error
 const identifiers = result.length > 10 ? result.slice(0, 10) : result;
 
-const secondDelay = poeTradeFetch.httpRequest.getWaitTime(RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST);
+const secondDelay = poeTradeFetch.httpRequest.getWaitTime(
+  RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST,
+);
 await poeTradeFetch.httpRequest.delay(secondDelay);
 
 // here you get information about 10 listings on poe trade
-const { result: secondResult } = await poeTradeFetch.secondRequest(identifiers, id);
-console.log('Trade Data Items:', secondResult);
+const {result: secondResult} = await poeTradeFetch.secondRequest(
+  identifiers,
+  id,
+);
+console.log("Trade Data Items:", secondResult);
 const amountPrice = secondResult[0].listing.price.amount;
 const currencyPrice = secondResult[0].listing.price.currency;

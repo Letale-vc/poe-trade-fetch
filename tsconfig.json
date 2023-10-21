@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
+    "target": "ES2022",
+    "module": "ES6",
+    "moduleResolution": "Node",
     "outDir": "./dist",
     "rootDir": "./src",
     "allowJs": true,
@@ -10,5 +11,15 @@
     "removeComments": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules", "**/*.spec.ts", "dist", "coverage", "tests", "index.d.ts", "example"]
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "dist",
+    "coverage",
+    "tests",
+    "index.d.ts",
+    "example",
+    "jest.config.js",
+    "eslint.config.js"
+  ]
 }

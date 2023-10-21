@@ -1,4 +1,4 @@
-import { RealmsType } from './types';
+import {RealmsType} from "./types.js";
 
 export interface PoeFirstResponseType {
   id: string;
@@ -40,8 +40,8 @@ interface ItemPropertyType {
 }
 interface ItemSocketType {
   group: number;
-  attr: 'S' | 'D' | 'I' | 'G' | 'A' | 'DV';
-  sColour: 'R' | 'G' | 'B' | 'W' | 'A' | 'DV';
+  attr: "S" | "D" | "I" | "G" | "A" | "DV";
+  sColour: "R" | "G" | "B" | "W" | "A" | "DV";
 }
 
 export interface ItemType {
@@ -102,7 +102,7 @@ export interface ItemType {
   enchantMods?: string[];
   scourgeMods?: string[];
   implicitMods?: string[];
-  ultimatumMods?: { type: string; tier: number }[];
+  ultimatumMods?: {type: string; tier: number}[];
   explicitMods?: string[];
   craftedMods?: string[];
   fracturedMods?: string[];
@@ -151,15 +151,15 @@ export interface ItemType {
 export interface PoeSecondResultType {
   id: string;
   listing: {
-    method: 'psapi';
+    method: "psapi";
     indexed: Date;
-    stash: { name: string; x: number; y: number };
+    stash: {name: string; x: number; y: number};
     whisper: string;
     whisper_token: string;
     account: {
       name: string;
       lastCharacterName: string;
-      online: { league: string };
+      online: {league: string};
       language: string;
       realm: string;
     };

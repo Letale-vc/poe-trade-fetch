@@ -4,9 +4,12 @@
   "description": "poe trade fetch",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sourceType": "module",
+  "type": "module",
   "release": {
     "branches": [
-      "master"
+      "master",
+      "dev"
     ],
     "plugins": [
       "@semantic-release/commit-analyzer",
@@ -19,8 +22,9 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "npm run prebuild && tsc",
-    "lint": "eslint src/**/*.ts",
-    "format": "eslint src/**/*.ts --fix",
+    "lint": "eslint",
+    "lint-fix": "eslint",
+    "format": "npx prettier --write",
     "test": "jest",
     "pub": "npm run build && npm publish",
     "semantic-release": "semantic-release"
@@ -34,13 +38,22 @@
     "fetch"
   ],
   "author": "Helpless",
-  "license": "MIT",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://www.opensource.org/licenses/mit-license.php"
+    },
+    {
+      "type": "Apache-2.0",
+      "url": "https://opensource.org/licenses/apache2.0.php"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/Letale-vc/poe-trade-fetch/issues"
   },
   "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
   "dependencies": {
-    "axios": "^1.5.0",
+    "axios": "^1.5.1",
     "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
@@ -49,19 +62,23 @@
     "@semantic-release/github": "^9.2.1",
     "@semantic-release/npm": "^11.0.0",
     "@semantic-release/release-notes-generator": "^12.0.0",
-    "@types/jest": "^29.5.5",
-    "@types/node": "^20.6.3",
-    "@typescript-eslint/eslint-plugin": "^6.7.2",
-    "@typescript-eslint/parser": "^6.7.2",
+    "@types/eslint": "^8.44.6",
+    "@types/jest": "^29.5.6",
+    "@types/node": "^20.8.7",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
     "axios-mock-adapter": "^1.22.0",
-    "eslint": "^8.49.0",
+    "esbuild": "^0.19.5",
+    "esbuild-register": "^3.5.0",
+    "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "jest": "^29.7.0",
     "prettier": "^3.0.3",
-    "rimraf": "^5.0.4",
+    "rimraf": "^5.0.5",
     "semantic-release": "^22.0.5",
     "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
 }

@@ -1,6 +1,7 @@
 # PoE Trade Fetch
 
-PoE Trade Fetch is a JavaScript library for interacting with the "Path of Exile" (PoE) in-game trading platform API. It allows you to retrieve item information.
+PoE Trade Fetch is a JavaScript library for interacting with the "Path of Exile"
+(PoE) in-game trading platform API. It allows you to retrieve item information.
 
 ## Key Features
 
@@ -89,4 +90,5 @@ const currencyPrice = secondResult[0].listing.price.currency;
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
