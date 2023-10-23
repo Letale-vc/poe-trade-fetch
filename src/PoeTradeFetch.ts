@@ -1,5 +1,5 @@
 import {AxiosRequestConfig} from "axios";
-import {HTTPRequest} from "./httpRequest.js";
+import {HTTPRequest} from "./HTTPRequest.js";
 import {
   ResponseLeagueListType,
   PoeTradeDataItemsResponseType,

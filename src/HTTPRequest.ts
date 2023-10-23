@@ -14,41 +14,41 @@ import {
 
 export class HTTPRequest {
   axiosInstance: AxiosInstance;
-  _requestStatesRateLimitsMap = new Map<string, RateStateLimitType>();
-  _lastRequestTimeMap = new Map<string, Date>();
-  _waitTimeMap = new Map<string, number>();
+  requestStatesRateLimitsMap = new Map<string, RateStateLimitType>();
+  lastRequestTimeMap = new Map<string, Date>();
+  waitTimeMap = new Map<string, number>();
   getWaitTime(key: RateLimitKeys) {
     this.updateWaitTime(key);
-    return this._waitTimeMap.get(key) || 0;
+    return this.waitTimeMap.get(key) || 0;
   }
   updateWaitTime(key: RateLimitKeys) {
-    let waitTime = this._waitTimeMap.get(key) || 0;
+    let waitTime = this.waitTimeMap.get(key) || 0;
     const dateNow = new Date().getTime();
-    const lastRequestTime = this._lastRequestTimeMap.get(key)?.getDate();
+    const lastRequestTime = this.lastRequestTimeMap.get(key)?.getDate();
     const differenceTimeInSec = (dateNow - (lastRequestTime || dateNow)) / 1000;
     if (waitTime && waitTime !== 0 && differenceTimeInSec >= waitTime) {
-      this._waitTimeMap.set(key, 0);
+      this.waitTimeMap.set(key, 0);
       return;
     }
-    const states = this._requestStatesRateLimitsMap.get(key);
+    const states = this.requestStatesRateLimitsMap.get(key);
     if (states !== undefined) {
-      const accWaitTime = this._stateCheck(
+      const accWaitTime = this.stateCheck(
         states.accountLimitState,
         states.accountLimit,
       );
-      const ipWaitTime = this._stateCheck(states.ipLimitState, states.ipLimit);
+      const ipWaitTime = this.stateCheck(states.ipLimitState, states.ipLimit);
       waitTime = Math.max(accWaitTime, ipWaitTime);
     }
     if (differenceTimeInSec !== 0 && differenceTimeInSec <= waitTime) {
       waitTime = waitTime - differenceTimeInSec;
     }
-    this._waitTimeMap.set(key, waitTime);
+    this.waitTimeMap.set(key, waitTime);
   }
   isRequestAllowed(key: RateLimitKeys) {
     return this.getWaitTime(key) === 0 ? true : false;
   }
 
-  private _stateCheck(limitState: Array<number[]>, limit: Array<number[]>) {
+  private stateCheck(limitState: Array<number[]>, limit: Array<number[]>) {
     return limitState.reduce((acc, [current, period], index) => {
       let time = acc;
       const [maxHits] = limit[index];
@@ -60,12 +60,12 @@ export class HTTPRequest {
     }, 0);
   }
   constructor(userAgent: string) {
-    this.axiosInstance = this._createAxiosInstance(userAgent);
-    this._setupRequestInterceptors();
-    this._setupResponseInterceptors();
-    for (const [_, value] of Object.entries(RATE_LIMIT_STATE_KEYS)) {
-      this._waitTimeMap.set(value, 0);
-      this._requestStatesRateLimitsMap.set(value, {
+    this.axiosInstance = this.createAxiosInstance(userAgent);
+    this.setupRequestInterceptors();
+    this.setupResponseInterceptors();
+    for (const [, value] of Object.entries(RATE_LIMIT_STATE_KEYS)) {
+      this.waitTimeMap.set(value, 0);
+      this.requestStatesRateLimitsMap.set(value, {
         accountLimitState: [],
         ipLimitState: [],
         accountLimit: [],
@@ -74,7 +74,7 @@ export class HTTPRequest {
     }
   }
 
-  private _createAxiosInstance(userAgent: string): AxiosInstance {
+  private createAxiosInstance(userAgent: string): AxiosInstance {
     const axiosConfig: CreateAxiosDefaults = {
       baseURL: POE_API_BASE_URL,
       headers: {
@@ -83,6 +83,7 @@ export class HTTPRequest {
         access: "*/*",
       },
     };
+
     return axios.create(axiosConfig);
   }
   async delay(seconds = 10) {
@@ -92,9 +93,14 @@ export class HTTPRequest {
     });
   }
 
-  private _setupRequestInterceptors() {
+  setPoesessid(POESESSID: string | null) {
+    this.axiosInstance.defaults.headers.common["Cookie"] =
+      POESESSID === null ? "" : `POESESSID=${POESESSID}`;
+  }
+
+  private setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async config => {
-      const keyLimit = this._rateLimitKey(config.url);
+      const keyLimit = this.rateLimitKey(config.url);
       if (!this.isRequestAllowed(keyLimit)) {
         throw new Error("Rate limit exceeded");
       }
@@ -102,7 +108,7 @@ export class HTTPRequest {
     });
   }
 
-  private _updateRateLimits(res: AxiosResponse): RateStateLimitType {
+  private updateRateLimits(res: AxiosResponse): RateStateLimitType {
     const headers = res.headers;
     const state = {
       accountLimitState: [],
@@ -126,7 +132,7 @@ export class HTTPRequest {
     }
     return updatedState;
   }
-  private _rateLimitKey(url: string | undefined): RateLimitKeys {
+  private rateLimitKey(url: string | undefined): RateLimitKeys {
     let key: RateLimitKeys = RATE_LIMIT_STATE_KEYS.OTHER;
     if (url) {
       if (url.includes(POE_API_FIRST_REQUEST.replace("/:realm/:league", ""))) {
@@ -137,14 +143,11 @@ export class HTTPRequest {
     }
     return key;
   }
-  private _setupResponseInterceptors() {
+  private setupResponseInterceptors() {
     this.axiosInstance.interceptors.response.use(res => {
-      const keyLimit = this._rateLimitKey(res.config.url);
-      this._lastRequestTimeMap.set(keyLimit, new Date());
-      this._requestStatesRateLimitsMap.set(
-        keyLimit,
-        this._updateRateLimits(res),
-      );
+      const keyLimit = this.rateLimitKey(res.config.url);
+      this.lastRequestTimeMap.set(keyLimit, new Date());
+      this.requestStatesRateLimitsMap.set(keyLimit, this.updateRateLimits(res));
       return res;
     });
   }

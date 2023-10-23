@@ -1,5 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
-import {HTTPRequest} from "./httpRequest.js";
+import {HTTPRequest} from "./HTTPRequest.js";
 import {
   POE_API_BASE_URL,
   POE_API_FIRST_REQUEST,
@@ -57,7 +57,7 @@ describe("PoeTradeFetch", () => {
         "https://www.pathofexile.com/api/trade/search/Ancestor",
       );
 
-      const firsRequestState = axiosInstance._requestStatesRateLimitsMap.get(
+      const firsRequestState = axiosInstance.requestStatesRateLimitsMap.get(
         POE_API_FIRST_REQUEST,
       );
       expect(firsRequestState?.accountLimitState).toEqual([[1, 5, 0]]);
@@ -65,7 +65,7 @@ describe("PoeTradeFetch", () => {
       expect(firsRequestState?.accountLimit).toEqual([[3, 5, 60]]);
       expect(firsRequestState?.ipLimit).toEqual([[8, 10, 60]]);
 
-      const secondRequestState = axiosInstance._requestStatesRateLimitsMap.get(
+      const secondRequestState = axiosInstance.requestStatesRateLimitsMap.get(
         POE_API_SECOND_REQUEST,
       );
       expect(secondRequestState?.accountLimitState).toEqual([[1, 3, 1]]);
