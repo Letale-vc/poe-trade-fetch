@@ -25,7 +25,7 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "format": "prettier . --write",
-    "test": "jest",
+    "test": "jest ./src",
     "pub": "npm run build && npm publish",
     "semantic-release": "semantic-release"
   },
