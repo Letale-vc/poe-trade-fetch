@@ -20,6 +20,6 @@
     "index.d.ts",
     "example",
     "jest.config.js",
-    "eslint.config.js"
+    ".eslintrc.cjs"
   ]
 }

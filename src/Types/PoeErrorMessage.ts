@@ -17,7 +17,8 @@ export const PoeErrorCodes = {
   7: "Temporarily Unavailable",
   9: "Method not allowed",
   10: "Unprocessable Entity",
-};
+} as const;
 
-type ErrorCodesType = keyof typeof PoeErrorCodes;
-type ErrorMessagesType = (typeof PoeErrorCodes)[keyof typeof PoeErrorCodes];
+export type ErrorCodesType = keyof typeof PoeErrorCodes;
+export type ErrorMessagesType =
+  (typeof PoeErrorCodes)[keyof typeof PoeErrorCodes];

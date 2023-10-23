@@ -161,6 +161,30 @@ describe("PoeTradeFetch", () => {
       expect(mockGetTradePage).toBeCalledWith("testId", "testPoesessid");
       expect(mockGetTradePage).toBeCalledTimes(1);
     });
+    test("should be return error", async () => {
+      const firstResponseMock: PoeFirstResponseType = {
+        result: [],
+        id: "testId",
+        complexity: 11,
+        total: 11,
+      };
+      jest
+        .spyOn(poeTradeFetch, "firsRequest")
+        .mockResolvedValue(firstResponseMock);
+      const secondResponseDataMock = {result: []};
+      jest
+        .spyOn(poeTradeFetch, "secondRequest")
+        .mockResolvedValue(secondResponseDataMock);
+      const pathTestPage = path.resolve("tests/mockPageLogin.html");
+      const testPage = readFileSync(pathTestPage, "utf-8");
+      jest.spyOn(poeTradeFetch, "getTradePage").mockResolvedValue(testPage);
+
+      const url = new URL("https://www.pathofexile.com/trade/search/testId");
+
+      await expect(
+        poeTradeFetch.poeTradeSearchUrl(url, "testPoesessid"),
+      ).rejects.toThrow("Unknown page state structure");
+    });
   });
 
   describe("getTradePage", () => {

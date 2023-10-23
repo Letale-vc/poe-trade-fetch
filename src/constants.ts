@@ -8,6 +8,7 @@ export const POE_API_TRADE_DATA_STATS_URL = "api/trade/data/stats/";
 // ------ These URLs require delay --------------
 export const POE_API_FIRST_REQUEST = "api/trade/search/:realm/:league";
 export const POE_API_SECOND_REQUEST = "api/trade/fetch/";
+export const POE_API_EXCHANGE_REQUEST = "api/trade/exchange/:league";
 // -------------------------------
 
 // --- League names  ---
@@ -46,5 +47,6 @@ export const DEFAULT_CONFIG = {
 export const RATE_LIMIT_STATE_KEYS = {
   POE_API_FIRST_REQUEST,
   POE_API_SECOND_REQUEST,
+  POE_API_EXCHANGE_REQUEST,
   OTHER: "OTHER",
 } as const;

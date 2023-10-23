@@ -6,40 +6,40 @@ export interface SortType {
   [key: string]: string;
 }
 export interface QueryType {
-  status?: Status | string;
-  name?: string | Name;
-  type?: string | Type;
+  status?: StatusType | string;
+  name?: string | NameType;
+  type?: string | TypeType;
   term?: string;
-  stats?: Stat[];
-  filters?: Filters;
+  stats?: StatType[];
+  filters?: FiltersType;
 }
-interface Filters {
-  misc_filters?: MiscFilters;
-  type_filters?: TypeFilters;
-  trade_filters?: TradeFilters;
-  sanctum_filters?: SanctumFilters;
-  heist_filters?: HeistFilters;
-  map_filters?: MapFilters;
-  req_filters?: ReqFilters;
-  socket_filters?: SocketFilters;
-  armour_filters?: ArmourFilters;
-  weapon_filters?: WeaponFilters;
+interface FiltersType {
+  misc_filters?: MiscFiltersType;
+  type_filters?: TypeFiltersType;
+  trade_filters?: TradeFiltersType;
+  sanctum_filters?: SanctumFiltersType;
+  heist_filters?: HeistFiltersType;
+  map_filters?: MapFiltersType;
+  req_filters?: ReqFiltersType;
+  socket_filters?: SocketFiltersType;
+  armour_filters?: ArmourFiltersType;
+  weapon_filters?: WeaponFiltersType;
 }
-interface Status {
+interface StatusType {
   option?: string;
 }
-interface Name {
+interface NameType {
   discriminator?: string;
   option?: string;
 }
-interface Type {
+interface TypeType {
   discriminator?: string;
   option?: string;
 }
 
-interface Stat {
+interface StatType {
   type?: string;
-  filters?: Filter[];
+  filters?: FilterType[];
   disabled?: boolean;
   value?: {
     min?: number | null;
@@ -48,7 +48,7 @@ interface Stat {
   };
 }
 
-interface Filter {
+interface FilterType {
   id?: string;
   disabled?: boolean;
   value?: {
@@ -58,162 +58,162 @@ interface Filter {
   };
 }
 
-interface MiscFilters {
+interface MiscFiltersType {
   filters?: {
-    quality?: RangeFilter;
-    gem_level?: RangeFilter;
-    ilvl?: RangeFilter;
-    gem_level_progress?: RangeFilter;
-    gem_alternate_quality?: OptionFilter;
-    fractured_item?: OptionFilter;
-    tangled_item?: OptionFilter;
-    synthesised_item?: OptionFilter;
-    crucible_item?: OptionFilter;
-    corrupted?: OptionFilter;
-    split?: OptionFilter;
-    veiled?: OptionFilter;
-    crafted?: OptionFilter;
-    foreseeing?: OptionFilter;
-    searing_item?: OptionFilter;
-    mirrored?: OptionFilter;
-    identified?: OptionFilter;
-    talisman_tier?: RangeFilter;
-    stack_size?: RangeFilter;
-    stored_experience?: RangeFilter;
-    alternate_art?: OptionFilter;
-    foil_variation?: OptionFilter;
+    quality?: RangeFilterType;
+    gem_level?: RangeFilterType;
+    ilvl?: RangeFilterType;
+    gem_level_progress?: RangeFilterType;
+    gem_alternate_quality?: OptionFilterType;
+    fractured_item?: OptionFilterType;
+    tangled_item?: OptionFilterType;
+    synthesised_item?: OptionFilterType;
+    crucible_item?: OptionFilterType;
+    corrupted?: OptionFilterType;
+    split?: OptionFilterType;
+    veiled?: OptionFilterType;
+    crafted?: OptionFilterType;
+    foreseeing?: OptionFilterType;
+    searing_item?: OptionFilterType;
+    mirrored?: OptionFilterType;
+    identified?: OptionFilterType;
+    talisman_tier?: RangeFilterType;
+    stack_size?: RangeFilterType;
+    stored_experience?: RangeFilterType;
+    alternate_art?: OptionFilterType;
+    foil_variation?: OptionFilterType;
   };
   disabled?: boolean;
 }
 
-interface TypeFilters {
+interface TypeFiltersType {
   filters?: {
-    rarity?: OptionFilter;
-    category?: OptionFilter;
+    rarity?: OptionFilterType;
+    category?: OptionFilterType;
   };
   disabled?: boolean;
 }
 
-interface TradeFilters {
+interface TradeFiltersType {
   filters?: {
-    account?: InputFilter;
-    collapse?: OptionFilter;
-    indexed?: OptionFilter;
-    sale_type?: OptionFilter;
-    price?: PriceFilter;
+    account?: InputFilterType;
+    collapse?: OptionFilterType;
+    indexed?: OptionFilterType;
+    sale_type?: OptionFilterType;
+    price?: PriceFilterType;
   };
   disabled?: boolean;
 }
 
-interface SanctumFilters {
+interface SanctumFiltersType {
   disabled?: boolean;
   filters?: {
-    sanctum_resolve?: RangeFilter;
-    sanctum_inspiration?: RangeFilter;
-    sanctum_max_resolve?: RangeFilter;
-    sanctum_gold?: RangeFilter;
+    sanctum_resolve?: RangeFilterType;
+    sanctum_inspiration?: RangeFilterType;
+    sanctum_max_resolve?: RangeFilterType;
+    sanctum_gold?: RangeFilterType;
   };
 }
 
-interface HeistFilters {
+interface HeistFiltersType {
   disabled?: boolean;
   filters?: {
-    heist_wings?: RangeFilter;
-    heist_reward_rooms?: RangeFilter;
-    heist_escape_routes?: RangeFilter;
-    heist_max_wings?: RangeFilter;
-    heist_max_reward_rooms?: RangeFilter;
-    heist_max_escape_routes?: RangeFilter;
-    heist_objective_value?: OptionFilter;
-    heist_lockpicking?: RangeFilter;
-    heist_counter_thaumaturgy?: RangeFilter;
-    heist_engineering?: RangeFilter;
-    heist_agility?: RangeFilter;
-    heist_demolition?: RangeFilter;
-    heist_deception?: RangeFilter;
-    heist_brute_force?: RangeFilter;
-    heist_trap_disarmament?: RangeFilter;
-    heist_perception?: RangeFilter;
+    heist_wings?: RangeFilterType;
+    heist_reward_rooms?: RangeFilterType;
+    heist_escape_routes?: RangeFilterType;
+    heist_max_wings?: RangeFilterType;
+    heist_max_reward_rooms?: RangeFilterType;
+    heist_max_escape_routes?: RangeFilterType;
+    heist_objective_value?: OptionFilterType;
+    heist_lockpicking?: RangeFilterType;
+    heist_counter_thaumaturgy?: RangeFilterType;
+    heist_engineering?: RangeFilterType;
+    heist_agility?: RangeFilterType;
+    heist_demolition?: RangeFilterType;
+    heist_deception?: RangeFilterType;
+    heist_brute_force?: RangeFilterType;
+    heist_trap_disarmament?: RangeFilterType;
+    heist_perception?: RangeFilterType;
   };
 }
 
-interface MapFilters {
+interface MapFiltersType {
   disabled?: boolean;
   filters?: {
-    map_tier?: RangeFilter;
-    map_iiq?: RangeFilter;
-    area_level?: RangeFilter;
-    map_iir?: RangeFilter;
-    map_packsize?: RangeFilter;
-    map_blighted?: OptionFilter;
-    map_series?: OptionFilter;
-    map_uberblighted?: OptionFilter;
+    map_tier?: RangeFilterType;
+    map_iiq?: RangeFilterType;
+    area_level?: RangeFilterType;
+    map_iir?: RangeFilterType;
+    map_packsize?: RangeFilterType;
+    map_blighted?: OptionFilterType;
+    map_series?: OptionFilterType;
+    map_uberblighted?: OptionFilterType;
   };
 }
 
-interface ReqFilters {
+interface ReqFiltersType {
   disabled?: boolean;
   filters?: {
-    lvl?: RangeFilter;
-    dex?: RangeFilter;
-    class?: OptionFilter;
-    int?: RangeFilter;
-    str?: RangeFilter;
+    lvl?: RangeFilterType;
+    dex?: RangeFilterType;
+    class?: OptionFilterType;
+    int?: RangeFilterType;
+    str?: RangeFilterType;
   };
 }
 
-interface SocketFilters {
+interface SocketFiltersType {
   disabled?: boolean;
   filters?: {
-    sockets?: SocketsFilter;
-    links?: LinksFilter;
+    sockets?: SocketsFilterType;
+    links?: LinksFilterType;
   };
 }
 
-interface ArmourFilters {
+interface ArmourFiltersType {
   disabled?: boolean;
   filters?: {
-    ar?: RangeFilter;
-    es?: RangeFilter;
-    block?: RangeFilter;
-    ward?: RangeFilter;
-    base_defence_percentile?: RangeFilter;
-    ev?: RangeFilter;
+    ar?: RangeFilterType;
+    es?: RangeFilterType;
+    block?: RangeFilterType;
+    ward?: RangeFilterType;
+    base_defence_percentile?: RangeFilterType;
+    ev?: RangeFilterType;
   };
 }
 
-interface WeaponFilters {
+interface WeaponFiltersType {
   disabled?: boolean;
   filters?: {
-    damage?: RangeFilter;
-    crit?: RangeFilter;
-    pdps?: RangeFilter;
-    aps?: RangeFilter;
-    dps?: RangeFilter;
-    edps?: RangeFilter;
+    damage?: RangeFilterType;
+    crit?: RangeFilterType;
+    pdps?: RangeFilterType;
+    aps?: RangeFilterType;
+    dps?: RangeFilterType;
+    edps?: RangeFilterType;
   };
 }
 
-interface RangeFilter {
+interface RangeFilterType {
   min?: number | null;
   max?: number | null;
 }
 
-interface OptionFilter {
+interface OptionFilterType {
   option?: string | null;
 }
 
-interface InputFilter {
+interface InputFilterType {
   input?: string | null;
 }
 
-interface PriceFilter {
+interface PriceFilterType {
   option?: string | null;
   min?: number | null;
   max?: number | null;
 }
 
-interface SocketsFilter {
+interface SocketsFilterType {
   r?: number | null;
   g?: number | null;
   min?: number | null;
@@ -222,7 +222,7 @@ interface SocketsFilter {
   b?: number | null;
 }
 
-interface LinksFilter {
+interface LinksFilterType {
   g?: number | null;
   r?: number | null;
   b?: number | null;

@@ -80,5 +80,8 @@ const {result: secondResult} = await poeTradeFetch.secondRequest(
   id,
 );
 console.log("Trade Data Items:", secondResult);
-const amountPrice = secondResult[0].listing.price.amount;
-const currencyPrice = secondResult[0].listing.price.currency;
+console.log(
+  "price: ",
+  secondResult[0].listing.price.amount,
+  secondResult[0].listing.price.currency,
+);

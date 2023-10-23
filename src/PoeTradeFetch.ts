@@ -6,7 +6,7 @@ import {
   PoeFirstResponseType,
   PoeSecondResponseType,
 } from "./Types/PoeResponseType.js";
-import {RequestBodyType, QueryType} from "./Types/TradeRequestBodyType.js";
+import {RequestBodyType} from "./Types/TradeRequestBodyType.js";
 import {PoeTradeFetchConfigType, ConfigInputType} from "./Types/types.js";
 import {
   DEFAULT_CONFIG,
@@ -17,8 +17,16 @@ import {
   REALMS,
   POE_API_SECOND_REQUEST,
   POE_SEARCH_PAGE_URL,
+  POE_API_EXCHANGE_REQUEST,
 } from "./constants.js";
 import * as cheerio from "cheerio";
+import {TradeExchangeRequestType} from "./Types/TradeExchangeRequestBodyType.js";
+import {ExchangeResponseType} from "./Types/ExchangeResponseType.js";
+import {
+  ExchangeStateType,
+  PageStatesType,
+  SearchStateType,
+} from "./Types/PageStates.js";
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
@@ -37,6 +45,7 @@ export class PoeTradeFetch {
   // Метод для оновлення конфігурації
   async update(config: ConfigInputType = {}) {
     this.config = {...this.config, ...config};
+    this.httpRequest.setPoesessid(this.config.POESESSID);
     let leagueName: string = this.config.leagueName;
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
       const currentLeagueName = await this.getCurrentLeagueName();
@@ -48,10 +57,6 @@ export class PoeTradeFetch {
           );
     }
     this.leagueName = leagueName;
-    this.httpRequest.axiosInstance.defaults.headers.common["Cookie"] = this
-      .config.POESESSID
-      ? `POESESSID=${this.config.POESESSID}`
-      : ".js";
   }
 
   // Метод для отримання єдиного екземпляра класу
@@ -82,7 +87,7 @@ export class PoeTradeFetch {
   }
 
   // Метод для отримання інформації про предмети
-  async tradeDataItems(): Promise<PoeTradeDataItemsResponseType> {
+  async getTradeDataItems(): Promise<PoeTradeDataItemsResponseType> {
     return await this.httpRequest.get<PoeTradeDataItemsResponseType>(
       POE_API_TRADE_DATA_ITEMS_URL,
     );
@@ -119,14 +124,62 @@ export class PoeTradeFetch {
     return await this.httpRequest.get<PoeSecondResponseType>(basePath);
   }
 
+  async exchangeRequest(
+    requestBody: TradeExchangeRequestType,
+  ): Promise<ExchangeResponseType> {
+    let path = POE_API_EXCHANGE_REQUEST.replace(":league", this.leagueName);
+    path =
+      this.config.realm === REALMS.pc
+        ? path.replace("/:realm", "")
+        : path.replace(":realm", this.config.realm);
+
+    return await this.httpRequest.post<ExchangeResponseType>(path, requestBody);
+  }
+  async fetchExchangeUrl(
+    url: URL,
+    poesessid?: string,
+  ): Promise<ExchangeResponseType> {
+    const queryId = this.getQueryIdInTradeUrl(url);
+    const page = await this.getTradePage(queryId, poesessid);
+    const {state} = this.getPoeTradePageState<ExchangeStateType>(page);
+    const body = this.createExchangeBody(state);
+    const delay = this.httpRequest.getWaitTime(POE_API_EXCHANGE_REQUEST);
+    await this.httpRequest.delay(delay);
+    return await this.exchangeRequest(body);
+  }
+
+  createExchangeBody(state: ExchangeStateType): TradeExchangeRequestType {
+    const transformedData: TradeExchangeRequestType = {
+      query: {
+        status: {option: "online"},
+        have: Object.keys(state.exchange.have),
+        want: Object.keys(state.exchange.want),
+      },
+      sort: {have: "asc"},
+      engine: "new",
+    };
+    if ("account" in state.exchange) {
+      transformedData.query.account = state.exchange.account;
+    }
+    if ("minimum" in state.exchange) {
+      transformedData.query.minimum = state.exchange.minimum;
+    }
+    if ("collapse" in state.exchange) {
+      transformedData.query.collapse = state.exchange.collapse;
+    }
+    if ("fulfillable" in state.exchange) {
+      transformedData.query.fulfillable = state.exchange.fulfillable;
+    }
+    return transformedData;
+  }
   // Метод для пошуку по URL торгівельної платформи PoE
   async poeTradeSearchUrl(
     url: URL,
-    poesessid: string,
+    poesessid?: string,
   ): Promise<PoeSecondResponseType> {
     const queryId = this.getQueryIdInTradeUrl(url);
     const page = await this.getTradePage(queryId, poesessid);
-    const requestBody = this._createRequestBody(page);
+    const requestBody = this.createSearchRequestBody(page);
 
     const firstDelay = this.httpRequest.getWaitTime(POE_API_FIRST_REQUEST);
     await this.httpRequest.delay(firstDelay);
@@ -160,36 +213,51 @@ export class PoeTradeFetch {
   }
 
   // Отримання об'єкту тіла запиту для першого запиту
-  _createRequestBody(page: string): RequestBodyType {
-    const pageState = this._getPoeTradePageState(page);
+  private createSearchRequestBody(page: string): RequestBodyType {
+    const {state} = this.getPoeTradePageState(page);
     return {
-      query: pageState,
+      query: state,
       sort: {price: "asc"},
     };
   }
 
-  // Отримання стану сторінки
-  _getPoeTradePageState(page: string): QueryType {
+  getPoeTradePageState<
+    T extends ExchangeStateType | SearchStateType,
+    S extends PageStatesType<T> = PageStatesType<T>,
+  >(page: string): S {
     const cheerioPage = cheerio.load(page);
-    let state: QueryType | undefined;
+    let state: S | null = null;
     cheerioPage('body script:contains("t\\(")').each((_, element) => {
       const scriptContent = cheerioPage(element).html();
-      const match = scriptContent?.match(/t\(([\s\S]*?)\);/);
-      if (match) {
+      const match = scriptContent?.match(/t\(\s*({[^;]+})\s*\);/);
+      if (!!match) {
         const jsonString = match[1];
         try {
-          const data = JSON.parse(jsonString) as unknown;
-          if (!!data && typeof data === "object" && "state" in data) {
-            state = data.state as QueryType;
+          const parsedPageStates = JSON.parse(jsonString);
+          if (this.isValidPageStates(parsedPageStates)) {
+            state = parsedPageStates as S;
+          } else {
+            throw new Error("Unknown page state structure");
           }
         } catch (e) {
-          throw new Error("Failed to parse JSON:" + e);
+          throw new Error(`Failed to parse JSON: ${e}`);
         }
       }
     });
-    if (state === undefined) {
+    if (state === null) {
       throw new Error("Error page parse");
     }
     return state;
+  }
+  private isValidPageStates(parsedPageStates: object): boolean {
+    return (
+      parsedPageStates.hasOwnProperty("state") &&
+      parsedPageStates.hasOwnProperty("league") &&
+      parsedPageStates.hasOwnProperty("tab") &&
+      parsedPageStates.hasOwnProperty("realm") &&
+      parsedPageStates.hasOwnProperty("realms") &&
+      parsedPageStates.hasOwnProperty("leagues") &&
+      parsedPageStates.hasOwnProperty("league")
+    );
   }
 }
