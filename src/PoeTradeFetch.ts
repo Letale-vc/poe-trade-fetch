@@ -231,7 +231,7 @@ export class PoeTradeFetch {
       const scriptContent = cheerioPage(element).html();
       const match = scriptContent?.match(/t\(\s*({[^;]+})\s*\);/);
       if (!!match) {
-        const jsonString = match[1];
+        const jsonString = match[1]; //?
         try {
           const parsedPageStates = JSON.parse(jsonString);
           if (this.isValidPageStates(parsedPageStates)) {
