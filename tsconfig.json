@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "UMD",
-    "moduleResolution": "Node",
-    "outDir": "./dist",
     "rootDir": "./src",
+    "target": "ESNext",
+    // "module": "ES6",
+    "moduleResolution": "Node10",
+    "removeComments": true,
     "allowJs": true,
     "strict": true,
-    "declaration": true,
-    "removeComments": true,
     "esModuleInterop": true
   },
   "exclude": [
@@ -20,6 +18,7 @@
     "index.d.ts",
     "example",
     "jest.config.js",
-    ".eslintrc.cjs"
+    ".eslintrc.cjs",
+    "fixTypeModule.js"
   ]
 }

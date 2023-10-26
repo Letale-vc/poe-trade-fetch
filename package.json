@@ -2,26 +2,27 @@
   "name": "poe-trade-fetch",
   "version": "0.0.0-development",
   "description": "poe trade fetch",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "sourceType": "module",
-  "type": "module",
-  "release": {
-    "branches": [
-      "master",
-      "dev"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
-      "@semantic-release/npm",
-      "@semantic-release/github"
-    ]
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/*.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/*.js",
+      "import": "./dist/esm/*.js",
+      "default": "./dist/esm/*.js"
+    }
   },
+  "typesVersions": {
+    ">=4.2": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "type": "module",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "npm run prebuild && tsc",
+    "build": "npm run prebuild && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.types.json && node fixTypeModule.js",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "format": "prettier . --write",
@@ -65,12 +66,10 @@
     "@types/eslint": "^8.44.6",
     "@types/eslint-config-prettier": "^6.11.2",
     "@types/jest": "^29.5.6",
-    "@types/node": "^20.8.7",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
+    "@types/node": "^20.8.9",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
     "axios-mock-adapter": "^1.22.0",
-    "esbuild": "^0.19.5",
-    "esbuild-register": "^3.5.0",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",

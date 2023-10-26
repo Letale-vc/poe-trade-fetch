@@ -2,14 +2,14 @@ import {
   POE_API_FIRST_REQUEST,
   POE_API_SECOND_REQUEST,
   PoeTradeFetch,
-} from "../dist/index.js";
+} from "../dist/esm/index.js";
 
 (async () => {
   const api = new PoeTradeFetch();
   await api.update();
   for (let i = 0; i <= 10; i++) {
     console.log("CYCLE: ", i);
-    console.log(api.httpRequest._requestStatesRateLimitsMap);
+    console.log(api.httpRequest.requestStatesRateLimitsMap);
     const firstDelay = api.httpRequest.getWaitTime(POE_API_FIRST_REQUEST);
     console.log("First delay: ", firstDelay);
     await api.httpRequest.delay(firstDelay);
