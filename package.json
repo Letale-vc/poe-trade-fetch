@@ -4,12 +4,13 @@
   "description": "poe trade fetch",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "types": "dist/types/*.d.ts",
+  "types": "index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/cjs/*.js",
-      "import": "./dist/esm/*.js",
-      "default": "./dist/esm/*.js"
+      "types": "./dist/type/index.d.ts",
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
     }
   },
   "typesVersions": {
