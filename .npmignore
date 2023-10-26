@@ -9,7 +9,13 @@ jest.config.js
 .releaserc.json
 .gitignore
 .github
-
+coverage/
+example/,
+.eslintrc.cjs,
+fixTypeModule.js
+tsconfig.cjs.json
+tsconfig.esm.json
+tsconfig.types.json
 
 
 
