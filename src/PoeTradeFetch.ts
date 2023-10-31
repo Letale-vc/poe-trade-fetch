@@ -195,7 +195,7 @@ export class PoeTradeFetch {
   }
 
   // Метод для отримання сторінки торгівлі за її ідентифікатором
-  async getTradePage(queryId: string, poesessid?: string) {
+  async getTradePage(queryId: string, poesessid?: string): Promise<string> {
     const baseUrl = POE_SEARCH_PAGE_URL;
     const addLeaguePath = baseUrl.replace(":league", this.leagueName);
     const addIdPath = addLeaguePath.replace(":id", queryId);
@@ -213,7 +213,7 @@ export class PoeTradeFetch {
   }
 
   // Отримання об'єкту тіла запиту для першого запиту
-  private createSearchRequestBody(page: string): RequestBodyType {
+  createSearchRequestBody(page: string): RequestBodyType {
     const {state} = this.getPoeTradePageState(page);
     return {
       query: state,
