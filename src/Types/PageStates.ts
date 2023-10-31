@@ -54,7 +54,7 @@ export interface WantType {
 
 // search state
 export interface StatValueType {
-  min: number;
+  min: number | null;
   max: number | null;
 }
 
@@ -79,16 +79,16 @@ export interface FiltersType {
 export interface SearchStateType {
   stats: StatGroupType[];
   status: string;
-  filters: {
-    weapon_filters: FiltersType;
-    map_filters: FiltersType;
-    req_filters: FiltersType;
-    misc_filters: FiltersType;
-    type_filters: FiltersType;
-    heist_filters: FiltersType;
-    trade_filters: FiltersType;
-    armour_filters: FiltersType;
-    socket_filters: FiltersType;
-    sanctum_filters: FiltersType;
+  filters?: {
+    weapon_filters?: FiltersType;
+    map_filters?: FiltersType;
+    req_filters?: FiltersType;
+    misc_filters?: FiltersType;
+    type_filters?: FiltersType;
+    heist_filters?: FiltersType;
+    trade_filters?: FiltersType;
+    armour_filters?: FiltersType;
+    socket_filters?: FiltersType;
+    sanctum_filters?: FiltersType;
   };
 }
