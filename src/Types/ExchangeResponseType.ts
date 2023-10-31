@@ -1,55 +1,74 @@
-export interface ExchangeResponseType {
-  id: string;
-  complexity: null;
-  result: ResultType;
-  total: number;
-}
+import {z} from "zod";
 
-export interface ResultType {
-  [key: string]: ListingItemInfoType;
-}
+export const onlineTypeSchema = z.object({
+  league: z.string(),
+});
 
-export interface ListingItemInfoType {
-  id: string;
-  item: null;
-  listing: ListingType;
-}
+export const offerExchangeTypeSchema = z.object({
+  currency: z.string(),
+  amount: z.number(),
+  whisper: z.string(),
+});
 
-export interface ListingType {
-  indexed: string;
-  account: AccountType;
-  offers: OfferType[];
-  whisper: string;
-  whisper_token: string;
-}
+export const OfferItemTypeSchema = z.object({
+  currency: z.string(),
+  amount: z.number(),
+  stock: z.number(),
+  id: z.string(),
+  whisper: z.string(),
+});
 
-export interface AccountType {
-  name: string;
-  online: OnlineType;
-  lastCharacterName: string;
-  language: string;
-  realm: string;
-}
+export const accountTypeSchema = z.object({
+  name: z.string(),
+  online: onlineTypeSchema,
+  lastCharacterName: z.string(),
+  language: z.string(),
+  realm: z.string(),
+});
 
-export interface OnlineType {
-  league: string;
-}
+export const offerTypeSchema = z.object({
+  exchange: offerExchangeTypeSchema,
+  item: OfferItemTypeSchema,
+});
 
-export interface OfferType {
-  exchange: ExchangeType;
-  item: ItemType;
-}
+export const listingTypeSchema = z.object({
+  indexed: z.string(),
+  account: accountTypeSchema,
+  offers: z.array(offerTypeSchema),
+  whisper: z.string(),
+  whisper_token: z.string(),
+});
 
-export interface ExchangeType {
-  currency: string;
-  amount: number;
-  whisper: string;
-}
+export const listingItemInfoTypeSchema = z.object({
+  id: z.string(),
+  item: z.null(),
+  listing: listingTypeSchema,
+});
 
-export interface ItemType {
-  currency: string;
-  amount: number;
-  stock: number;
-  id: string;
-  whisper: string;
-}
+export const resultTypeSchema = z.record(listingItemInfoTypeSchema);
+
+export const exchangeResponseTypeSchema = z.object({
+  id: z.string(),
+  complexity: z.null(),
+  result: resultTypeSchema,
+  total: z.number(),
+});
+
+// inferred types:
+export type OnlineType = z.infer<typeof onlineTypeSchema>;
+
+export type OfferExchangeType = z.infer<typeof offerExchangeTypeSchema>;
+
+export type OfferItemType = z.infer<typeof OfferItemTypeSchema>;
+
+export type AccountType = z.infer<typeof accountTypeSchema>;
+
+export type OfferType = z.infer<typeof offerTypeSchema>;
+
+export type ListingType = z.infer<typeof listingTypeSchema>;
+
+export type ListingItemInfoType = z.infer<typeof listingItemInfoTypeSchema>;
+
+export type ResultType = z.infer<typeof resultTypeSchema>;
+
+export type ExchangeResponseType = z.infer<typeof exchangeResponseTypeSchema>;

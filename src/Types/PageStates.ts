@@ -1,4 +1,4 @@
-export interface PageStatesType<T extends SearchStateType | ExchangeStateType> {
+export interface PageStatesType<T> {
   tab: "search" | "exchange";
   realm: RealmType["id"];
   realms: RealmType[];

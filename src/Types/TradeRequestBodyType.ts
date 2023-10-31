@@ -1,232 +1,269 @@
-export interface RequestBodyType {
-  query: QueryType;
-  sort?: SortType;
-}
-export interface SortType {
-  [key: string]: string;
-}
-export interface QueryType {
-  status?: StatusType | string;
-  name?: string | NameType;
-  type?: string | TypeType;
-  term?: string;
-  stats?: StatType[];
-  filters?: FiltersType;
-}
-interface FiltersType {
-  misc_filters?: MiscFiltersType;
-  type_filters?: TypeFiltersType;
-  trade_filters?: TradeFiltersType;
-  sanctum_filters?: SanctumFiltersType;
-  heist_filters?: HeistFiltersType;
-  map_filters?: MapFiltersType;
-  req_filters?: ReqFiltersType;
-  socket_filters?: SocketFiltersType;
-  armour_filters?: ArmourFiltersType;
-  weapon_filters?: WeaponFiltersType;
-}
-interface StatusType {
-  option?: string;
-}
-interface NameType {
-  discriminator?: string;
-  option?: string;
-}
-interface TypeType {
-  discriminator?: string;
-  option?: string;
-}
+import {z} from "zod";
 
-interface StatType {
-  type?: string;
-  filters?: FilterType[];
-  disabled?: boolean;
-  value?: {
-    min?: number | null;
-    weight?: number;
-    option?: number | null;
-  };
-}
+export const sortTypeSchema = z.record(z.string());
 
-interface FilterType {
-  id?: string;
-  disabled?: boolean;
-  value?: {
-    min?: number | null;
-    weight?: number;
-    option?: number | null;
-  };
-}
+const statusTypeSchema = z.object({
+  option: z.string().optional(),
+});
 
-interface MiscFiltersType {
-  filters?: {
-    quality?: RangeFilterType;
-    gem_level?: RangeFilterType;
-    ilvl?: RangeFilterType;
-    gem_level_progress?: RangeFilterType;
-    gem_alternate_quality?: OptionFilterType;
-    fractured_item?: OptionFilterType;
-    tangled_item?: OptionFilterType;
-    synthesised_item?: OptionFilterType;
-    crucible_item?: OptionFilterType;
-    corrupted?: OptionFilterType;
-    split?: OptionFilterType;
-    veiled?: OptionFilterType;
-    crafted?: OptionFilterType;
-    foreseeing?: OptionFilterType;
-    searing_item?: OptionFilterType;
-    mirrored?: OptionFilterType;
-    identified?: OptionFilterType;
-    talisman_tier?: RangeFilterType;
-    stack_size?: RangeFilterType;
-    stored_experience?: RangeFilterType;
-    alternate_art?: OptionFilterType;
-    foil_variation?: OptionFilterType;
-  };
-  disabled?: boolean;
-}
+const nameTypeSchema = z.object({
+  discriminator: z.string().optional(),
+  option: z.string().optional(),
+});
 
-interface TypeFiltersType {
-  filters?: {
-    rarity?: OptionFilterType;
-    category?: OptionFilterType;
-  };
-  disabled?: boolean;
-}
+const typeTypeSchema = z.object({
+  discriminator: z.string().optional(),
+  option: z.string().optional(),
+});
 
-interface TradeFiltersType {
-  filters?: {
-    account?: InputFilterType;
-    collapse?: OptionFilterType;
-    indexed?: OptionFilterType;
-    sale_type?: OptionFilterType;
-    price?: PriceFilterType;
-  };
-  disabled?: boolean;
-}
+const filterTypeSchema = z.object({
+  id: z.string().optional(),
+  disabled: z.boolean().optional(),
+  value: z
+    .object({
+      min: z.number().optional().nullable(),
+      weight: z.number().optional(),
+      option: z.number().optional().nullable(),
+    })
+    .optional(),
+});
 
-interface SanctumFiltersType {
-  disabled?: boolean;
-  filters?: {
-    sanctum_resolve?: RangeFilterType;
-    sanctum_inspiration?: RangeFilterType;
-    sanctum_max_resolve?: RangeFilterType;
-    sanctum_gold?: RangeFilterType;
-  };
-}
+const rangeFilterTypeSchema = z.object({
+  min: z.number().optional().nullable(),
+  max: z.number().optional().nullable(),
+});
 
-interface HeistFiltersType {
-  disabled?: boolean;
-  filters?: {
-    heist_wings?: RangeFilterType;
-    heist_reward_rooms?: RangeFilterType;
-    heist_escape_routes?: RangeFilterType;
-    heist_max_wings?: RangeFilterType;
-    heist_max_reward_rooms?: RangeFilterType;
-    heist_max_escape_routes?: RangeFilterType;
-    heist_objective_value?: OptionFilterType;
-    heist_lockpicking?: RangeFilterType;
-    heist_counter_thaumaturgy?: RangeFilterType;
-    heist_engineering?: RangeFilterType;
-    heist_agility?: RangeFilterType;
-    heist_demolition?: RangeFilterType;
-    heist_deception?: RangeFilterType;
-    heist_brute_force?: RangeFilterType;
-    heist_trap_disarmament?: RangeFilterType;
-    heist_perception?: RangeFilterType;
-  };
-}
+const optionFilterTypeSchema = z.object({
+  option: z.string().optional().nullable(),
+});
 
-interface MapFiltersType {
-  disabled?: boolean;
-  filters?: {
-    map_tier?: RangeFilterType;
-    map_iiq?: RangeFilterType;
-    area_level?: RangeFilterType;
-    map_iir?: RangeFilterType;
-    map_packsize?: RangeFilterType;
-    map_blighted?: OptionFilterType;
-    map_series?: OptionFilterType;
-    map_uberblighted?: OptionFilterType;
-  };
-}
+const inputFilterTypeSchema = z.object({
+  input: z.string().optional().nullable(),
+});
 
-interface ReqFiltersType {
-  disabled?: boolean;
-  filters?: {
-    lvl?: RangeFilterType;
-    dex?: RangeFilterType;
-    class?: OptionFilterType;
-    int?: RangeFilterType;
-    str?: RangeFilterType;
-  };
-}
+const priceFilterTypeSchema = z.object({
+  option: z.string().optional().nullable(),
+  min: z.number().optional().nullable(),
+  max: z.number().optional().nullable(),
+});
 
-interface SocketFiltersType {
-  disabled?: boolean;
-  filters?: {
-    sockets?: SocketsFilterType;
-    links?: LinksFilterType;
-  };
-}
+const socketsFilterTypeSchema = z.object({
+  r: z.number().optional().nullable(),
+  g: z.number().optional().nullable(),
+  min: z.number().optional().nullable(),
+  max: z.number().optional().nullable(),
+  w: z.number().optional().nullable(),
+  b: z.number().optional().nullable(),
+});
 
-interface ArmourFiltersType {
-  disabled?: boolean;
-  filters?: {
-    ar?: RangeFilterType;
-    es?: RangeFilterType;
-    block?: RangeFilterType;
-    ward?: RangeFilterType;
-    base_defence_percentile?: RangeFilterType;
-    ev?: RangeFilterType;
-  };
-}
+const linksFilterTypeSchema = z.object({
+  g: z.number().optional().nullable(),
+  r: z.number().optional().nullable(),
+  b: z.number().optional().nullable(),
+  w: z.number().optional().nullable(),
+  min: z.number().optional().nullable(),
+  max: z.number().optional().nullable(),
+});
 
-interface WeaponFiltersType {
-  disabled?: boolean;
-  filters?: {
-    damage?: RangeFilterType;
-    crit?: RangeFilterType;
-    pdps?: RangeFilterType;
-    aps?: RangeFilterType;
-    dps?: RangeFilterType;
-    edps?: RangeFilterType;
-  };
-}
+const statTypeSchema = z.object({
+  type: z.string().optional(),
+  filters: z.array(filterTypeSchema).optional(),
+  disabled: z.boolean().optional(),
+  value: z
+    .object({
+      min: z.number().optional().nullable(),
+      weight: z.number().optional(),
+      option: z.number().optional().nullable(),
+    })
+    .optional(),
+});
 
-interface RangeFilterType {
-  min?: number | null;
-  max?: number | null;
-}
+const miscFiltersTypeSchema = z.object({
+  filters: z
+    .object({
+      quality: rangeFilterTypeSchema.optional(),
+      gem_level: rangeFilterTypeSchema.optional(),
+      ilvl: rangeFilterTypeSchema.optional(),
+      gem_level_progress: rangeFilterTypeSchema.optional(),
+      gem_alternate_quality: optionFilterTypeSchema.optional(),
+      fractured_item: optionFilterTypeSchema.optional(),
+      tangled_item: optionFilterTypeSchema.optional(),
+      synthesised_item: optionFilterTypeSchema.optional(),
+      crucible_item: optionFilterTypeSchema.optional(),
+      corrupted: optionFilterTypeSchema.optional(),
+      split: optionFilterTypeSchema.optional(),
+      veiled: optionFilterTypeSchema.optional(),
+      crafted: optionFilterTypeSchema.optional(),
+      foreseeing: optionFilterTypeSchema.optional(),
+      searing_item: optionFilterTypeSchema.optional(),
+      mirrored: optionFilterTypeSchema.optional(),
+      identified: optionFilterTypeSchema.optional(),
+      talisman_tier: rangeFilterTypeSchema.optional(),
+      stack_size: rangeFilterTypeSchema.optional(),
+      stored_experience: rangeFilterTypeSchema.optional(),
+      alternate_art: optionFilterTypeSchema.optional(),
+      foil_variation: optionFilterTypeSchema.optional(),
+    })
+    .optional(),
+  disabled: z.boolean().optional(),
+});
 
-interface OptionFilterType {
-  option?: string | null;
-}
+const typeFiltersTypeSchema = z.object({
+  filters: z
+    .object({
+      rarity: optionFilterTypeSchema.optional(),
+      category: optionFilterTypeSchema.optional(),
+    })
+    .optional(),
+  disabled: z.boolean().optional(),
+});
 
-interface InputFilterType {
-  input?: string | null;
-}
+const tradeFiltersTypeSchema = z.object({
+  filters: z
+    .object({
+      account: inputFilterTypeSchema.optional(),
+      collapse: optionFilterTypeSchema.optional(),
+      indexed: optionFilterTypeSchema.optional(),
+      sale_type: optionFilterTypeSchema.optional(),
+      price: priceFilterTypeSchema.optional(),
+    })
+    .optional(),
+  disabled: z.boolean().optional(),
+});
 
-interface PriceFilterType {
-  option?: string | null;
-  min?: number | null;
-  max?: number | null;
-}
+const sanctumFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      sanctum_resolve: rangeFilterTypeSchema.optional(),
+      sanctum_inspiration: rangeFilterTypeSchema.optional(),
+      sanctum_max_resolve: rangeFilterTypeSchema.optional(),
+      sanctum_gold: rangeFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
 
-interface SocketsFilterType {
-  r?: number | null;
-  g?: number | null;
-  min?: number | null;
-  max?: number | null;
-  w?: number | null;
-  b?: number | null;
-}
+const heistFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      heist_wings: rangeFilterTypeSchema.optional(),
+      heist_reward_rooms: rangeFilterTypeSchema.optional(),
+      heist_escape_routes: rangeFilterTypeSchema.optional(),
+      heist_max_wings: rangeFilterTypeSchema.optional(),
+      heist_max_reward_rooms: rangeFilterTypeSchema.optional(),
+      heist_max_escape_routes: rangeFilterTypeSchema.optional(),
+      heist_objective_value: optionFilterTypeSchema.optional(),
+      heist_lockpicking: rangeFilterTypeSchema.optional(),
+      heist_counter_thaumaturgy: rangeFilterTypeSchema.optional(),
+      heist_engineering: rangeFilterTypeSchema.optional(),
+      heist_agility: rangeFilterTypeSchema.optional(),
+      heist_demolition: rangeFilterTypeSchema.optional(),
+      heist_deception: rangeFilterTypeSchema.optional(),
+      heist_brute_force: rangeFilterTypeSchema.optional(),
+      heist_trap_disarmament: rangeFilterTypeSchema.optional(),
+      heist_perception: rangeFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
 
-interface LinksFilterType {
-  g?: number | null;
-  r?: number | null;
-  b?: number | null;
-  w?: number | null;
-  min?: number | null;
-  max?: number | null;
-}
+const mapFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      map_tier: rangeFilterTypeSchema.optional(),
+      map_iiq: rangeFilterTypeSchema.optional(),
+      area_level: rangeFilterTypeSchema.optional(),
+      map_iir: rangeFilterTypeSchema.optional(),
+      map_packsize: rangeFilterTypeSchema.optional(),
+      map_blighted: optionFilterTypeSchema.optional(),
+      map_series: optionFilterTypeSchema.optional(),
+      map_uberblighted: optionFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
+
+const reqFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      lvl: rangeFilterTypeSchema.optional(),
+      dex: rangeFilterTypeSchema.optional(),
+      class: optionFilterTypeSchema.optional(),
+      int: rangeFilterTypeSchema.optional(),
+      str: rangeFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
+
+const socketFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      sockets: socketsFilterTypeSchema.optional(),
+      links: linksFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
+
+const armourFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      ar: rangeFilterTypeSchema.optional(),
+      es: rangeFilterTypeSchema.optional(),
+      block: rangeFilterTypeSchema.optional(),
+      ward: rangeFilterTypeSchema.optional(),
+      base_defence_percentile: rangeFilterTypeSchema.optional(),
+      ev: rangeFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
+
+const weaponFiltersTypeSchema = z.object({
+  disabled: z.boolean().optional(),
+  filters: z
+    .object({
+      damage: rangeFilterTypeSchema.optional(),
+      crit: rangeFilterTypeSchema.optional(),
+      pdps: rangeFilterTypeSchema.optional(),
+      aps: rangeFilterTypeSchema.optional(),
+      dps: rangeFilterTypeSchema.optional(),
+      edps: rangeFilterTypeSchema.optional(),
+    })
+    .optional(),
+});
+
+const filtersTypeSchema = z.object({
+  misc_filters: miscFiltersTypeSchema.optional(),
+  type_filters: typeFiltersTypeSchema.optional(),
+  trade_filters: tradeFiltersTypeSchema.optional(),
+  sanctum_filters: sanctumFiltersTypeSchema.optional(),
+  heist_filters: heistFiltersTypeSchema.optional(),
+  map_filters: mapFiltersTypeSchema.optional(),
+  req_filters: reqFiltersTypeSchema.optional(),
+  socket_filters: socketFiltersTypeSchema.optional(),
+  armour_filters: armourFiltersTypeSchema.optional(),
+  weapon_filters: weaponFiltersTypeSchema.optional(),
+});
+
+export const queryTypeSchema = z.object({
+  status: z.union([statusTypeSchema, z.string()]).optional(),
+  name: z.union([z.string(), nameTypeSchema]).optional(),
+  type: z.union([z.string(), typeTypeSchema]).optional(),
+  term: z.string().optional(),
+  stats: z.array(statTypeSchema).optional(),
+  filters: filtersTypeSchema.optional(),
+});
+
+export const requestBodyTypeSchema = z.object({
+  query: queryTypeSchema,
+  sort: sortTypeSchema.optional(),
+});
+
+// inferred types:
+export type SortType = z.infer<typeof sortTypeSchema>;
+
+export type QueryType = z.infer<typeof queryTypeSchema>;
+
+export type RequestBodyType = z.infer<typeof requestBodyTypeSchema>;
