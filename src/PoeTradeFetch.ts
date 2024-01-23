@@ -1,5 +1,4 @@
 import {AxiosRequestConfig} from "axios";
-import {HTTPRequest} from "./HTTPRequest.js";
 import {
   ResponseLeagueListType,
   PoeTradeDataItemsResponseType,
@@ -27,25 +26,26 @@ import {
   PageStatesType,
   SearchStateType,
 } from "./Types/PageStates.js";
+import {HttpRequest} from "./HttpRequestNew.js";
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
   leagueName: string;
   config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
-  httpRequest: HTTPRequest;
+  httpRequest: HttpRequest;
 
   constructor(config: ConfigInputType = {}) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
     this.config = {...this.config, ...config};
     this.leagueName = LEAGUES_NAMES.Standard;
-    this.httpRequest = new HTTPRequest(this.config.userAgent);
+    this.httpRequest = new HttpRequest(this.config.userAgent);
   }
   // constructor END
 
   // Метод для оновлення конфігурації
   async update(config: ConfigInputType = {}) {
     this.config = {...this.config, ...config};
-    this.httpRequest.setPoesessid(this.config.POESESSID);
+    this.httpRequest.setPoesessidAsDefault(this.config.POESESSID);
     let leagueName: string = this.config.leagueName;
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
       const currentLeagueName = await this.getCurrentLeagueName();
@@ -143,7 +143,9 @@ export class PoeTradeFetch {
     const page = await this.getTradePage(queryId, poesessid);
     const {state} = this.getPoeTradePageState<ExchangeStateType>(page);
     const body = this.createExchangeBody(state);
-    const delay = this.httpRequest.getWaitTime(POE_API_EXCHANGE_REQUEST);
+    const delay = this.httpRequest.rateLimiter.getWaitTime(
+      POE_API_EXCHANGE_REQUEST,
+    );
     await this.httpRequest.delay(delay);
     return await this.exchangeRequest(body);
   }
@@ -181,14 +183,18 @@ export class PoeTradeFetch {
     const page = await this.getTradePage(queryId, poesessid);
     const requestBody = this.createSearchRequestBody(page);
 
-    const firstDelay = this.httpRequest.getWaitTime(POE_API_FIRST_REQUEST);
+    const firstDelay = this.httpRequest.rateLimiter.getWaitTime(
+      POE_API_FIRST_REQUEST,
+    );
     await this.httpRequest.delay(firstDelay);
 
     const {result} = await this.firsRequest(requestBody);
 
     const identifiers = result.length > 10 ? result.slice(0, 10) : result;
 
-    const secondDelay = this.httpRequest.getWaitTime(POE_API_SECOND_REQUEST);
+    const secondDelay = this.httpRequest.rateLimiter.getWaitTime(
+      POE_API_SECOND_REQUEST,
+    );
     await this.httpRequest.delay(secondDelay);
 
     return await this.secondRequest(identifiers, queryId);

@@ -20,6 +20,7 @@ export interface RateStateLimitType {
   ipLimitState: Array<number[]>;
   accountLimit: Array<number[]>;
   ipLimit: Array<number[]>;
+  lastResponseTime: number;
 }
 export type RateLimitKeys =
   (typeof RATE_LIMIT_STATE_KEYS)[keyof typeof RATE_LIMIT_STATE_KEYS];
