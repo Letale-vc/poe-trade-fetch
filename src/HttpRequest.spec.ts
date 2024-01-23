@@ -1,5 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
-import {HttpRequest} from "./HttpRequestNew.js";
+import {HttpRequest} from "./HttpRequest.js";
 import {
   POE_API_BASE_URL,
   POE_API_FIRST_REQUEST,

@@ -26,7 +26,7 @@ import {
   PageStatesType,
   SearchStateType,
 } from "./Types/PageStates.js";
-import {HttpRequest} from "./HttpRequestNew.js";
+import {HttpRequest} from "./HttpRequest.js";
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
