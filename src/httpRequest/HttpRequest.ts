@@ -21,6 +21,7 @@ import {delay} from "../utility/utility.js";
 export class HttpRequest {
   axiosInstance: AxiosInstance;
   rateLimiter = new RateLimiter();
+  lastRequestRegistryKey: string | undefined;
   useRateLimitDelay = true;
   constructor(appSettings: PoeTradeFetchConfigType) {
     this.axiosInstance = this.createAxiosInstance(appSettings.userAgent);
@@ -54,7 +55,12 @@ export class HttpRequest {
 
   private setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async config => {
-      const limitKey = this.getRateLimitKey(config.url);
+      let limitKey = this.getRateLimitKey(config.url);
+      if (!!config.httpAgent) {
+        config.headers["x-proxy-host"] = config.httpsAgent.host;
+        limitKey = `${limitKey}-${config.httpsAgent.host}`;
+      }
+
       if (this.useRateLimitDelay) {
         const waitTime = this.rateLimiter.getWaitTime(limitKey);
         await delay(waitTime);
@@ -68,6 +74,7 @@ export class HttpRequest {
   }
 
   private getNewRateLimits(res: AxiosResponse): RateStateLimitType {
+    console.log(res.headers);
     const headers = res.headers;
     const updatedState: RateStateLimitType = {
       accountLimitState: [],
@@ -91,7 +98,7 @@ export class HttpRequest {
     }
     return updatedState;
   }
-  private getRateLimitKey(url: string | undefined): RateLimitKeys {
+  private getRateLimitKey(url: string | undefined): string {
     let key: RateLimitKeys = RATE_LIMIT_STATE_KEYS.OTHER;
     if (url) {
       if (url.includes(POE_API_FIRST_REQUEST.replace("/:realm/:league", ""))) {
@@ -104,7 +111,11 @@ export class HttpRequest {
   }
   private setupResponseInterceptors() {
     this.axiosInstance.interceptors.response.use(res => {
-      const limitKey = this.getRateLimitKey(res.config.url);
+      let limitKey = this.getRateLimitKey(res.config.url);
+      if (!!res.headers["x-proxy-host"]) {
+        limitKey = `${limitKey}-${res.headers["x-proxy-host"]}`;
+      }
+
       const rateLimits = this.getNewRateLimits(res);
       this.rateLimiter.setRateLimitInfo(limitKey, rateLimits);
       return res;

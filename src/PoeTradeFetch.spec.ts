@@ -339,6 +339,7 @@ describe("PoeTradeFetch", () => {
       expect(mockHttpRequest.post).toHaveBeenCalledWith(
         expect.stringContaining(instance.leagueName),
         requestQuery,
+        undefined,
       );
     });
   });
@@ -356,7 +357,7 @@ describe("PoeTradeFetch", () => {
       const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
         ",",
       )}?query=${queryId}`;
-      expect(mockHttpRequest.get).toHaveBeenCalledWith(expectedPath);
+      expect(mockHttpRequest.get).toHaveBeenCalledWith(expectedPath, undefined);
     });
 
     it("should make a GET request to the correct path with non-pc realm", async () => {
@@ -374,7 +375,7 @@ describe("PoeTradeFetch", () => {
       const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
         ",",
       )}?query=${queryId}&realm=${REALMS.xbox}`;
-      expect(mockHttpRequest.get).toHaveBeenCalledWith(expectedPath);
+      expect(mockHttpRequest.get).toHaveBeenCalledWith(expectedPath, undefined);
     });
 
     it("should throw an error if the request fails", async () => {

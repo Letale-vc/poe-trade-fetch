@@ -100,6 +100,7 @@ export class PoeTradeFetch {
   // Перший запит, щоб отримати ідентифікатори предметів, розташованих на торгівельній платформі
   async firsRequest(
     requestQuery: RequestBodyType,
+    config?: AxiosRequestConfig,
   ): Promise<PoeFirstResponseType> {
     // Додаємо лігу до URL
     let path = POE_API_FIRST_REQUEST.replace(":league", this.leagueName);
@@ -112,6 +113,7 @@ export class PoeTradeFetch {
     return await this.httpRequest.post<PoeFirstResponseType>(
       path,
       requestQuery,
+      config,
     );
   }
 
@@ -119,6 +121,7 @@ export class PoeTradeFetch {
   async secondRequest(
     arrayIds: string[],
     queryId: string,
+    config?: AxiosRequestConfig,
   ): Promise<PoeSecondResponseType> {
     let basePath = POE_API_SECOND_REQUEST;
     basePath += arrayIds.join(",");
@@ -126,7 +129,7 @@ export class PoeTradeFetch {
     if (this.config.realm !== REALMS.pc) {
       basePath += `&realm=${this.config.realm}`;
     }
-    return await this.httpRequest.get<PoeSecondResponseType>(basePath);
+    return await this.httpRequest.get<PoeSecondResponseType>(basePath, config);
   }
 
   async exchangeRequest(
