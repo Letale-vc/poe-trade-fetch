@@ -1,6 +1,5 @@
 import {AxiosRequestConfig} from "axios";
 import {
-  ResponseLeagueListType,
   PoeTradeDataItemsResponseType,
   PoeFirstResponseType,
   PoeSecondResponseType,
@@ -10,7 +9,7 @@ import {PoeTradeFetchConfigType, ConfigInputType} from "./Types/types.js";
 import {
   DEFAULT_CONFIG,
   LEAGUES_NAMES,
-  POE_API_TRADE_DATA_LEAGUES_URL,
+  POE_API_DATA_LEAGUES_URL,
   POE_API_TRADE_DATA_ITEMS_URL,
   POE_API_FIRST_REQUEST,
   REALMS,
@@ -26,7 +25,8 @@ import {
   PageStatesType,
   SearchStateType,
 } from "./Types/PageStates.js";
-import {HttpRequest} from "./HttpRequest.js";
+import {HttpRequest} from "./httpRequest/HttpRequest.js";
+import {LeagueResponseType} from "./Types/PoeLeagueResponseType.js";
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
@@ -34,33 +34,38 @@ export class PoeTradeFetch {
   config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
   httpRequest: HttpRequest;
 
-  constructor(config: ConfigInputType = {}) {
+  constructor(config: ConfigInputType) {
     // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
     this.config = {...this.config, ...config};
     this.leagueName = LEAGUES_NAMES.Standard;
-    this.httpRequest = new HttpRequest(this.config.userAgent);
+    this.httpRequest = new HttpRequest(this.config);
   }
   // constructor END
 
   // Метод для оновлення конфігурації
-  async update(config: ConfigInputType = {}) {
+  async update(config: ConfigInputType) {
     this.config = {...this.config, ...config};
-    this.httpRequest.setPoesessidAsDefault(this.config.POESESSID);
-    let leagueName: string = this.config.leagueName;
+    this.httpRequest.updateConfig(this.config);
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
       const currentLeagueName = await this.getCurrentLeagueName();
-      leagueName = !currentLeagueName
-        ? LEAGUES_NAMES.Standard
-        : this.config.leagueName.replace(
-            LEAGUES_NAMES.Current,
-            currentLeagueName,
-          );
+      if (currentLeagueName === undefined) {
+        console.warn(
+          `[POE TRADE FETCH]: ${LEAGUES_NAMES.Current} league not found, using ${LEAGUES_NAMES.Standard} instead`,
+        );
+        this.leagueName = LEAGUES_NAMES.Standard;
+      } else {
+      }
+      this.leagueName = this.config.leagueName.replace(
+        LEAGUES_NAMES.Current,
+        currentLeagueName as string,
+      );
+    } else {
+      this.leagueName = this.config.leagueName;
     }
-    this.leagueName = leagueName;
   }
 
   // Метод для отримання єдиного екземпляра класу
-  static getInstance(config?: ConfigInputType): PoeTradeFetch {
+  static getInstance(config: ConfigInputType): PoeTradeFetch {
     if (!PoeTradeFetch.instance) {
       PoeTradeFetch.instance = new PoeTradeFetch(config);
     }
@@ -68,22 +73,21 @@ export class PoeTradeFetch {
   }
 
   // Метод для отримання списку доступних ліг
-  async leagueNames(): Promise<ResponseLeagueListType> {
-    return await this.httpRequest.get<ResponseLeagueListType>(
-      POE_API_TRADE_DATA_LEAGUES_URL,
+  async leagueList(): Promise<LeagueResponseType> {
+    return await this.httpRequest.get<LeagueResponseType>(
+      POE_API_DATA_LEAGUES_URL,
     );
   }
 
   // Метод для отримання назви поточної ліги
   async getCurrentLeagueName(): Promise<string | undefined> {
-    const {result} = await this.leagueNames();
-    const leagueName = result.find(
+    const leagueList = await this.leagueList();
+    return leagueList.find(
       el =>
-        !el.id.toLowerCase().includes(LEAGUES_NAMES.Standard.toLowerCase()) &&
-        !el.id.toLowerCase().includes(LEAGUES_NAMES.Hardcore.toLowerCase()) &&
-        !el.id.toLowerCase().includes(LEAGUES_NAMES.Ruthless.toLowerCase()),
-    )?.id;
-    return leagueName;
+        el.endAt !== null &&
+        new Date(el.endAt) > new Date() &&
+        el.category.current === true,
+    )?.category.id;
   }
 
   // Метод для отримання інформації про предмети
@@ -104,6 +108,7 @@ export class PoeTradeFetch {
       this.config.realm === REALMS.pc
         ? path.replace("/:realm", "")
         : path.replace(":realm", this.config.realm);
+
     return await this.httpRequest.post<PoeFirstResponseType>(
       path,
       requestQuery,
@@ -143,10 +148,7 @@ export class PoeTradeFetch {
     const page = await this.getTradePage(queryId, poesessid);
     const {state} = this.getPoeTradePageState<ExchangeStateType>(page);
     const body = this.createExchangeBody(state);
-    const delay = this.httpRequest.rateLimiter.getWaitTime(
-      POE_API_EXCHANGE_REQUEST,
-    );
-    await this.httpRequest.delay(delay);
+
     return await this.exchangeRequest(body);
   }
 
@@ -183,19 +185,9 @@ export class PoeTradeFetch {
     const page = await this.getTradePage(queryId, poesessid);
     const requestBody = this.createSearchRequestBody(page);
 
-    const firstDelay = this.httpRequest.rateLimiter.getWaitTime(
-      POE_API_FIRST_REQUEST,
-    );
-    await this.httpRequest.delay(firstDelay);
-
     const {result} = await this.firsRequest(requestBody);
 
     const identifiers = result.length > 10 ? result.slice(0, 10) : result;
-
-    const secondDelay = this.httpRequest.rateLimiter.getWaitTime(
-      POE_API_SECOND_REQUEST,
-    );
-    await this.httpRequest.delay(secondDelay);
 
     return await this.secondRequest(identifiers, queryId);
   }

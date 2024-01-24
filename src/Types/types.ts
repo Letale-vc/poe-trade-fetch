@@ -5,12 +5,14 @@ export interface ConfigInputType {
   userAgent?: string;
   realm?: RealmsType;
   POESESSID?: string | null;
+  useRateLimitDelay?: boolean;
 }
 export interface PoeTradeFetchConfigType {
   leagueName: LeaguesNamesType;
   userAgent: string;
   realm: RealmsType;
   POESESSID: null | string;
+  useRateLimitDelay: boolean;
 }
 export type RealmsType = (typeof REALMS)[keyof typeof REALMS];
 export type LeaguesNamesType =

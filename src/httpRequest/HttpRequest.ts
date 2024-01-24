@@ -4,23 +4,34 @@ import axios, {
   AxiosResponse,
   CreateAxiosDefaults,
 } from "axios";
-import {RateLimitKeys, RateStateLimitType} from "./Types/types.js";
+import {
+  PoeTradeFetchConfigType,
+  RateLimitKeys,
+  RateStateLimitType,
+} from "../Types/types.js";
 import {
   POE_API_BASE_URL,
   POE_API_FIRST_REQUEST,
   POE_API_SECOND_REQUEST,
   RATE_LIMIT_STATE_KEYS,
-} from "./constants.js";
-import {RateLimiter} from "./RateLimiter.js";
+} from "../constants.js";
+import {RateLimiter} from "../rateLimiter/RateLimiter.js";
+import {delay} from "../utility/utility.js";
 
 export class HttpRequest {
   axiosInstance: AxiosInstance;
   rateLimiter = new RateLimiter();
-
-  constructor(userAgent: string) {
-    this.axiosInstance = this.createAxiosInstance(userAgent);
+  useRateLimitDelay = true;
+  constructor(appSettings: PoeTradeFetchConfigType) {
+    this.axiosInstance = this.createAxiosInstance(appSettings.userAgent);
     this.setupRequestInterceptors();
     this.setupResponseInterceptors();
+    this.useRateLimitDelay = appSettings.useRateLimitDelay;
+  }
+  updateConfig(appSettings: PoeTradeFetchConfigType) {
+    this.useRateLimitDelay = appSettings.useRateLimitDelay;
+    this.axiosInstance.defaults.headers["User-Agent"] = appSettings.userAgent;
+    this.setPoesessidAsDefault(appSettings.POESESSID);
   }
 
   private createAxiosInstance(userAgent: string): AxiosInstance {
@@ -35,12 +46,6 @@ export class HttpRequest {
 
     return axios.create(axiosConfig);
   }
-  async delay(seconds = 10) {
-    const timeInMilliseconds = seconds * 1000;
-    return new Promise<void>(resolve => {
-      setTimeout(resolve, timeInMilliseconds);
-    });
-  }
 
   setPoesessidAsDefault(POESESSID: string | null) {
     this.axiosInstance.defaults.headers.common["Cookie"] =
@@ -50,6 +55,11 @@ export class HttpRequest {
   private setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async config => {
       const limitKey = this.getRateLimitKey(config.url);
+      if (this.useRateLimitDelay) {
+        const waitTime = this.rateLimiter.getWaitTime(limitKey);
+        await delay(waitTime);
+      }
+
       if (!this.rateLimiter.canMakeRequest(limitKey)) {
         throw new Error("Rate limit exceeded");
       }
@@ -64,7 +74,7 @@ export class HttpRequest {
       ipLimitState: [],
       accountLimit: [],
       ipLimit: [],
-      lastResponseTime: new Date().getTime(),
+      lastResponseTime: Date.now(),
     };
     const headerMappings: Record<string, keyof RateStateLimitType> = {
       "x-rate-limit-account-state": "accountLimitState",

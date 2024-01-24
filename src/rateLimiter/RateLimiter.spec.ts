@@ -1,5 +1,5 @@
 import {RateLimiter} from "./RateLimiter";
-import {RateStateLimitType} from "./Types/types";
+import {RateStateLimitType} from "../Types/types";
 
 describe("RateLimiter", () => {
   let rateLimiter: RateLimiter;
@@ -56,6 +56,14 @@ describe("RateLimiter", () => {
       rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
       const result = rateLimiter.getWaitTime(rateLimitKey);
       expect(result).toBeCloseTo(6);
+    });
+    it("should subtract differenceTimeInSec from waitTime if differenceTimeInSec is less than or equal to waitTime", () => {
+      rateLimitInfo.lastResponseTime = Date.now() - 2000;
+      rateLimitInfo.accountLimitState = [[3, 5]];
+      rateLimitInfo.ipLimitState = [[3, 7]];
+      rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
+      const result = rateLimiter.getWaitTime(rateLimitKey);
+      expect(result).toBeCloseTo(5);
     });
   });
 });
