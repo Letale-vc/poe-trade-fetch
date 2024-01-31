@@ -4,8 +4,10 @@ node_modules/
 tests/
 tsconfig.json
 .eslintrc.js
+.eslintrc
 jest.config.js
 .prettierrc.js
+.prettierrc
 .releaserc.json
 .gitignore
 .github
