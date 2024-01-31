@@ -1,13 +1,11 @@
 import {LEAGUES_NAMES, RATE_LIMIT_STATE_KEYS, REALMS} from "../constants.js";
 
-export interface ConfigInputType {
-  leagueName?: LeaguesNamesType;
-  userAgent?: string;
-  realm?: RealmsType;
-  POESESSID?: string | null;
-  useRateLimitDelay?: boolean;
-}
-export interface PoeTradeFetchConfigType {
+export type ConfigInputType = Partial<ConfigType> &
+  Pick<ConfigType, "userAgent">;
+
+export type ConfigUpdateType = Partial<ConfigType>;
+
+export interface ConfigType {
   leagueName: LeaguesNamesType;
   userAgent: string;
   realm: RealmsType;

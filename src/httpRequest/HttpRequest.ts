@@ -4,11 +4,7 @@ import axios, {
   AxiosResponse,
   CreateAxiosDefaults,
 } from "axios";
-import {
-  PoeTradeFetchConfigType,
-  RateLimitKeys,
-  RateStateLimitType,
-} from "../Types/types.js";
+import {ConfigType, RateLimitKeys, RateStateLimitType} from "../Types/types.js";
 import {
   POE_API_BASE_URL,
   POE_API_FIRST_REQUEST,
@@ -23,13 +19,13 @@ export class HttpRequest {
   rateLimiter = new RateLimiter();
   lastRequestRegistryKey: string | undefined;
   useRateLimitDelay = true;
-  constructor(appSettings: PoeTradeFetchConfigType) {
+  constructor(appSettings: ConfigType) {
     this.axiosInstance = this.createAxiosInstance(appSettings.userAgent);
     this.setupRequestInterceptors();
     this.setupResponseInterceptors();
     this.useRateLimitDelay = appSettings.useRateLimitDelay;
   }
-  updateConfig(appSettings: PoeTradeFetchConfigType) {
+  updateConfig(appSettings: ConfigType) {
     this.useRateLimitDelay = appSettings.useRateLimitDelay;
     this.axiosInstance.defaults.headers["User-Agent"] = appSettings.userAgent;
     this.setPoesessidAsDefault(appSettings.POESESSID);

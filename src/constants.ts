@@ -1,4 +1,4 @@
-import {PoeTradeFetchConfigType} from "./Types";
+import {ConfigType} from "./Types";
 
 //  PoE API URLs -----------------------------
 export const POE_API_BASE_URL = "https://www.pathofexile.com/";
@@ -37,7 +37,7 @@ export const REALMS = {
 //------------------------------------
 
 // Default config for PoeTradeApi
-export const DEFAULT_CONFIG: PoeTradeFetchConfigType = {
+export const DEFAULT_CONFIG: ConfigType = {
   leagueName: LEAGUES_NAMES.Standard,
   userAgent: "",
   realm: REALMS.pc,

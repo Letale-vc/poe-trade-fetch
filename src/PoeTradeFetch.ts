@@ -1,37 +1,37 @@
 import {AxiosRequestConfig} from "axios";
-import {
-  PoeTradeDataItemsResponseType,
-  PoeFirstResponseType,
-  PoeSecondResponseType,
-} from "./Types/PoeResponseType.js";
-import {RequestBodyType} from "./Types/TradeRequestBodyType.js";
-import {PoeTradeFetchConfigType, ConfigInputType} from "./Types/types.js";
-import {
-  DEFAULT_CONFIG,
-  LEAGUES_NAMES,
-  POE_API_DATA_LEAGUES_URL,
-  POE_API_TRADE_DATA_ITEMS_URL,
-  POE_API_FIRST_REQUEST,
-  REALMS,
-  POE_API_SECOND_REQUEST,
-  POE_SEARCH_PAGE_URL,
-  POE_API_EXCHANGE_REQUEST,
-} from "./constants.js";
 import * as cheerio from "cheerio";
-import {TradeExchangeRequestType} from "./Types/TradeExchangeRequestBodyType.js";
 import {ExchangeResponseType} from "./Types/ExchangeResponseType.js";
 import {
   ExchangeStateType,
   PageStatesType,
   SearchStateType,
 } from "./Types/PageStates.js";
-import {HttpRequest} from "./httpRequest/HttpRequest.js";
 import {LeagueResponseType} from "./Types/PoeLeagueResponseType.js";
+import {
+  PoeFirstResponseType,
+  PoeSecondResponseType,
+  PoeTradeDataItemsResponseType,
+} from "./Types/PoeResponseType.js";
+import {TradeExchangeRequestType} from "./Types/TradeExchangeRequestBodyType.js";
+import {RequestBodyType} from "./Types/TradeRequestBodyType.js";
+import {ConfigInputType, ConfigType, ConfigUpdateType} from "./Types/types.js";
+import {
+  DEFAULT_CONFIG,
+  LEAGUES_NAMES,
+  POE_API_DATA_LEAGUES_URL,
+  POE_API_EXCHANGE_REQUEST,
+  POE_API_FIRST_REQUEST,
+  POE_API_SECOND_REQUEST,
+  POE_API_TRADE_DATA_ITEMS_URL,
+  POE_SEARCH_PAGE_URL,
+  REALMS,
+} from "./constants.js";
+import {HttpRequest} from "./httpRequest/HttpRequest.js";
 
 export class PoeTradeFetch {
   static instance: PoeTradeFetch;
   leagueName: string;
-  config: PoeTradeFetchConfigType = DEFAULT_CONFIG;
+  config: ConfigType = DEFAULT_CONFIG;
   httpRequest: HttpRequest;
 
   constructor(config: ConfigInputType) {
@@ -43,7 +43,7 @@ export class PoeTradeFetch {
   // constructor END
 
   // Метод для оновлення конфігурації
-  async update(config: ConfigInputType) {
+  async update(config: ConfigUpdateType = {}) {
     this.config = {...this.config, ...config};
     this.httpRequest.updateConfig(this.config);
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
