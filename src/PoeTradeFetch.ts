@@ -43,9 +43,13 @@ export class PoeTradeFetch {
   // constructor END
 
   // Метод для оновлення конфігурації
-  async update(config: ConfigUpdateType = {}) {
+  async updateConfig(config: ConfigUpdateType = {}) {
     this.config = {...this.config, ...config};
     this.httpRequest.updateConfig(this.config);
+    await this.updateLeagueName();
+  }
+
+  async updateLeagueName() {
     if (this.config.leagueName.includes(LEAGUES_NAMES.Current)) {
       const currentLeagueName = await this.getCurrentLeagueName();
       if (currentLeagueName === undefined) {
@@ -54,11 +58,11 @@ export class PoeTradeFetch {
         );
         this.leagueName = LEAGUES_NAMES.Standard;
       } else {
+        this.leagueName = this.config.leagueName.replace(
+          LEAGUES_NAMES.Current,
+          currentLeagueName,
+        );
       }
-      this.leagueName = this.config.leagueName.replace(
-        LEAGUES_NAMES.Current,
-        currentLeagueName as string,
-      );
     } else {
       this.leagueName = this.config.leagueName;
     }
