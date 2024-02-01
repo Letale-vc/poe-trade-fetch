@@ -41,7 +41,9 @@ export class PoeTradeFetch {
     this.httpRequest = new HttpRequest(this.config);
   }
   // constructor END
-
+  async init() {
+    await this.updateLeagueName();
+  }
   // Метод для оновлення конфігурації
   async updateConfig(config: ConfigUpdateType = {}) {
     this.config = {...this.config, ...config};
