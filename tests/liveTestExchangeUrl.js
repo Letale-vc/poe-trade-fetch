@@ -1,4 +1,4 @@
-import {PoeTradeFetch} from "../dist/PoeTradeFetch.js";
+import { PoeTradeFetch } from "../dist/PoeTradeFetch.js";
 
 (async function () {
   const api = PoeTradeFetch.getInstance({POESESSID: process.env.POESESSID});
