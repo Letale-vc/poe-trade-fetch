@@ -2,15 +2,21 @@
   "name": "poe-trade-fetch",
   "version": "0.0.0-development",
   "description": "poe trade fetch",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/type/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "require": "./dist/cjs/index.js",
       "import": "./dist/esm/index.js",
       "default": "./dist/esm/index.js"
+    },
+    "./*": {
+      "types": "./dist/types/*.d.ts",
+      "require": "./dist/cjs/*.js",
+      "import": "./dist/esm/*.js",
+      "default": "./dist/esm/*.js"
     }
   },
   "typesVersions": {
@@ -69,32 +75,32 @@
   },
   "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
   "dependencies": {
-    "axios": "^1.5.1",
+    "axios": "^1.6.7",
     "cheerio": "^1.0.0-rc.12",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^11.0.0",
-    "@semantic-release/github": "^9.2.1",
-    "@semantic-release/npm": "^11.0.0",
-    "@semantic-release/release-notes-generator": "^12.0.0",
-    "@types/eslint": "^8.44.6",
-    "@types/eslint-config-prettier": "^6.11.2",
-    "@types/jest": "^29.5.6",
-    "@types/node": "^20.8.7",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
+    "@semantic-release/commit-analyzer": "^11.1.0",
+    "@semantic-release/github": "^9.2.6",
+    "@semantic-release/npm": "^11.0.2",
+    "@semantic-release/release-notes-generator": "^12.1.0",
+    "@types/eslint": "^8.56.2",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.17",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "axios-mock-adapter": "^1.22.0",
-    "eslint": "^8.52.0",
-    "http-proxy-agent": "^7.0.0",
-    "https-proxy-agent": "^7.0.2",
+    "eslint": "^8.56.0",
+    "http-proxy-agent": "^7.0.1",
+    "https-proxy-agent": "^7.0.3",
     "jest": "^29.7.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
-    "semantic-release": "^22.0.5",
-    "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "semantic-release": "^22.0.12",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

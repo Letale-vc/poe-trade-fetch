@@ -1,5 +1,11 @@
 {
-  "branches": ["main", "master"],
+  "branches": [
+    "master",
+    {
+      "name": "dev",
+      "prerelease": true
+    }
+  ],
   "ci": false,
   "plugins": [
     [
