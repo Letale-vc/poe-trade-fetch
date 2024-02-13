@@ -237,7 +237,7 @@ export class PoeTradeFetch {
     cheerioPage('body script:contains("t\\(")').each((_, element) => {
       const scriptContent = cheerioPage(element).html();
       const match = scriptContent?.match(/t\(\s*({[^;]+})\s*\);/);
-      if (!!match) {
+      if (match) {
         const jsonString = match[1];
         try {
           const parsedPageStates = JSON.parse(jsonString);
@@ -258,13 +258,13 @@ export class PoeTradeFetch {
   }
   private isValidPageStates(parsedPageStates: object): boolean {
     return (
-      parsedPageStates.hasOwnProperty("state") &&
-      parsedPageStates.hasOwnProperty("league") &&
-      parsedPageStates.hasOwnProperty("tab") &&
-      parsedPageStates.hasOwnProperty("realm") &&
-      parsedPageStates.hasOwnProperty("realms") &&
-      parsedPageStates.hasOwnProperty("leagues") &&
-      parsedPageStates.hasOwnProperty("league")
+      "state" in parsedPageStates &&
+      "league" in parsedPageStates &&
+      "tab" in parsedPageStates &&
+      "realm" in parsedPageStates &&
+      "realms" in parsedPageStates &&
+      "leagues" in parsedPageStates &&
+      "league" in parsedPageStates
     );
   }
 }
