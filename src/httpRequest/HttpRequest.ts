@@ -52,7 +52,7 @@ export class HttpRequest {
   private setupRequestInterceptors() {
     this.axiosInstance.interceptors.request.use(async config => {
       let limitKey = this.getRateLimitKey(config.url);
-      if (!!config.httpAgent) {
+      if (config.httpAgent) {
         config.headers["x-proxy-host"] = config.httpsAgent.host;
         limitKey = `${limitKey}-${config.httpsAgent.host}`;
       }
@@ -70,7 +70,6 @@ export class HttpRequest {
   }
 
   private getNewRateLimits(res: AxiosResponse): RateStateLimitType {
-    console.log(res.headers);
     const headers = res.headers;
     const updatedState: RateStateLimitType = {
       accountLimitState: [],
@@ -108,7 +107,7 @@ export class HttpRequest {
   private setupResponseInterceptors() {
     this.axiosInstance.interceptors.response.use(res => {
       let limitKey = this.getRateLimitKey(res.config.url);
-      if (!!res.headers["x-proxy-host"]) {
+      if (res.headers["x-proxy-host"]) {
         limitKey = `${limitKey}-${res.headers["x-proxy-host"]}`;
       }
 
