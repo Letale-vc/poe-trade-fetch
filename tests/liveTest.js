@@ -1,10 +1,10 @@
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import {
   POE_API_FIRST_REQUEST,
   POE_API_SECOND_REQUEST,
   PoeTradeFetch,
 } from "../dist/esm/index.js";
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { HttpProxyAgent } from 'http-proxy-agent';
 
 (async () => {
   const api = new PoeTradeFetch();
