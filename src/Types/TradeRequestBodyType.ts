@@ -38,7 +38,20 @@ const optionFilterTypeSchema = z.object({
 });
 
 const inputFilterTypeSchema = z.object({
-  input: z.string().optional().nullable(),
+  input: z
+    .enum([
+      "1hour",
+      "3hours",
+      "12hours",
+      "1day",
+      "3days",
+      "1week",
+      "2weeks",
+      "1month",
+      "2months",
+    ])
+    .optional()
+    .nullable(),
 });
 
 const priceFilterTypeSchema = z.object({
