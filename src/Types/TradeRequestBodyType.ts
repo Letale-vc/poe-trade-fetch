@@ -34,11 +34,7 @@ const rangeFilterTypeSchema = z.object({
 });
 
 const optionFilterTypeSchema = z.object({
-  option: z.string().optional().nullable(),
-});
-
-const inputFilterTypeSchema = z.object({
-  input: z
+  option: z
     .enum([
       "1hour",
       "3hours",
@@ -52,6 +48,10 @@ const inputFilterTypeSchema = z.object({
     ])
     .optional()
     .nullable(),
+});
+
+const inputFilterTypeSchema = z.object({
+  input: z.string().optional().nullable(),
 });
 
 const priceFilterTypeSchema = z.object({
