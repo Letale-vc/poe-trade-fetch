@@ -33,7 +33,7 @@ const rangeFilterTypeSchema = z.object({
   max: z.number().optional().nullable(),
 });
 
-const optionFilterTypeSchema = z.object({
+const optionIndexedFilterTypeSchema = z.object({
   option: z
     .enum([
       "1hour",
@@ -48,6 +48,9 @@ const optionFilterTypeSchema = z.object({
     ])
     .optional()
     .nullable(),
+});
+const optionFilterTypeSchema = z.object({
+  option: z.string().optional().nullable(),
 });
 
 const inputFilterTypeSchema = z.object({
@@ -136,7 +139,7 @@ const tradeFiltersTypeSchema = z.object({
     .object({
       account: inputFilterTypeSchema.optional(),
       collapse: optionFilterTypeSchema.optional(),
-      indexed: optionFilterTypeSchema.optional(),
+      indexed: optionIndexedFilterTypeSchema.optional(),
       sale_type: optionFilterTypeSchema.optional(),
       price: priceFilterTypeSchema.optional(),
     })
