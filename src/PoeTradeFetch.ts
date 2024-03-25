@@ -140,6 +140,7 @@ export class PoeTradeFetch {
 
   async exchangeRequest(
     requestBody: TradeExchangeRequestType,
+    config?: AxiosRequestConfig,
   ): Promise<ExchangeResponseType> {
     let path = POE_API_EXCHANGE_REQUEST.replace(":league", this.leagueName);
     path =
@@ -147,7 +148,11 @@ export class PoeTradeFetch {
         ? path.replace("/:realm", "")
         : path.replace(":realm", this.config.realm);
 
-    return await this.httpRequest.post<ExchangeResponseType>(path, requestBody);
+    return await this.httpRequest.post<ExchangeResponseType>(
+      path,
+      requestBody,
+      config,
+    );
   }
   async fetchExchangeUrl(
     url: URL,
