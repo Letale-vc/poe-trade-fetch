@@ -88,12 +88,7 @@ export class PoeTradeFetch {
   // Метод для отримання назви поточної ліги
   async getCurrentLeagueName(): Promise<string | undefined> {
     const leagueList = await this.leagueList();
-    return leagueList.find(
-      el =>
-        el.endAt !== null &&
-        new Date(el.endAt) > new Date() &&
-        el.category.current === true,
-    )?.category.id;
+    return leagueList.find(el => el.category.current === true)?.category.id;
   }
 
   // Метод для отримання інформації про предмети
