@@ -29,7 +29,7 @@
 			"./coverage/",
 			"./dist/",
 			"./.github/",
-			"./test/"
+			"./tests/"
 		 ]
 	},
 	"javascript": {
