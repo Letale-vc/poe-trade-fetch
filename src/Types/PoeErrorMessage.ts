@@ -1,3 +1,5 @@
+import { POE_ERROR_CODES } from "../constants";
+
 export interface PoeErrorMessage {
     error: {
         code: ErrorCodesType;
@@ -5,20 +7,6 @@ export interface PoeErrorMessage {
     };
 }
 
-export const PoeErrorCodes = {
-    0: "Accepted",
-    1: "Resource not found",
-    2: "Invalid query",
-    3: "Rate limit exceeded",
-    4: "Internal error",
-    5: "Unexpected content type",
-    8: "Unauthorized",
-    6: "Forbidden",
-    7: "Temporarily Unavailable",
-    9: "Method not allowed",
-    10: "Unprocessable Entity",
-} as const;
-
-export type ErrorCodesType = keyof typeof PoeErrorCodes;
+export type ErrorCodesType = keyof typeof POE_ERROR_CODES;
 export type ErrorMessagesType =
-    (typeof PoeErrorCodes)[keyof typeof PoeErrorCodes];
+    (typeof POE_ERROR_CODES)[keyof typeof POE_ERROR_CODES];

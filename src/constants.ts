@@ -1,4 +1,4 @@
-import {ConfigType} from "./Types";
+import { ConfigType } from "./Types";
 
 //  PoE API URLs -----------------------------
 export const POE_API_BASE_URL = "https://www.pathofexile.com/";
@@ -52,4 +52,18 @@ export const RATE_LIMIT_STATE_KEYS = {
     POE_API_SECOND_REQUEST,
     POE_API_EXCHANGE_REQUEST,
     OTHER: "OTHER",
+} as const;
+
+export const POE_ERROR_CODES = {
+    0: "Accepted",
+    1: "Resource not found",
+    2: "Invalid query",
+    3: "Rate limit exceeded",
+    4: "Internal error",
+    5: "Unexpected content type",
+    8: "Unauthorized",
+    6: "Forbidden",
+    7: "Temporarily Unavailable",
+    9: "Method not allowed",
+    10: "Unprocessable Entity",
 } as const;
