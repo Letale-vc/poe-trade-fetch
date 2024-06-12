@@ -15,41 +15,41 @@ export const POE_API_EXCHANGE_REQUEST = "api/trade/exchange/:league";
 
 // --- League names  ---
 export const LEAGUES_NAMES = {
-  Current: "Current",
-  Standard: "Standard",
-  Hardcore: "Hardcore",
-  Ruthless: "Ruthless",
-  HCRuthless: "HC Ruthless",
-  HCRuthlessCurrent: "HC Ruthless Current",
-  RuthlessCurrent: "Ruthless Current",
-  HardcoreCurrent: "Hardcore Current",
+    Current: "Current",
+    Standard: "Standard",
+    Hardcore: "Hardcore",
+    Ruthless: "Ruthless",
+    HCRuthless: "HC Ruthless",
+    HCRuthlessCurrent: "HC Ruthless Current",
+    RuthlessCurrent: "Ruthless Current",
+    HardcoreCurrent: "Hardcore Current",
 } as const;
 
 //--------------------------------------------
 
 // --- game realms ---
 export const REALMS = {
-  pc: "pc",
-  xbox: "xbox",
-  sony: "sony",
+    pc: "pc",
+    xbox: "xbox",
+    sony: "sony",
 } as const;
 
 //------------------------------------
 
 // Default config for PoeTradeApi
 export const DEFAULT_CONFIG: ConfigType = {
-  leagueName: LEAGUES_NAMES.Standard,
-  userAgent: "",
-  realm: REALMS.pc,
-  POESESSID: null,
-  useRateLimitDelay: true,
+    leagueName: LEAGUES_NAMES.Standard,
+    userAgent: "",
+    realm: REALMS.pc,
+    POESESSID: null,
+    useRateLimitDelay: true,
 } as const;
 
 // export const RATE_LIMIT_STATE_KEYS = [POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, 'other'];
 
 export const RATE_LIMIT_STATE_KEYS = {
-  POE_API_FIRST_REQUEST,
-  POE_API_SECOND_REQUEST,
-  POE_API_EXCHANGE_REQUEST,
-  OTHER: "OTHER",
+    POE_API_FIRST_REQUEST,
+    POE_API_SECOND_REQUEST,
+    POE_API_EXCHANGE_REQUEST,
+    OTHER: "OTHER",
 } as const;

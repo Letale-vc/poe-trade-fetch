@@ -1,25 +1,25 @@
 import {
-  LEAGUES_NAMES,
-  RATE_LIMIT_STATE_KEYS,
-  REALMS,
-  PoeTradeFetch,
-  RequestBodyType,
+    LEAGUES_NAMES,
+    RATE_LIMIT_STATE_KEYS,
+    REALMS,
+    PoeTradeFetch,
+    RequestBodyType,
 } from "../src/index.js";
 
 const poeTradeFetch = new PoeTradeFetch({
-  leagueName: LEAGUES_NAMES.Current, // League name (default is 'Standard')
-  userAgent: "My PoE App  your@mail.kek",
-  realm: REALMS.pc, // Realm (default is pc)
+    leagueName: LEAGUES_NAMES.Current, // League name (default is 'Standard')
+    userAgent: "My PoE App  your@mail.kek",
+    realm: REALMS.pc, // Realm (default is pc)
 });
 await poeTradeFetch.update();
 
 // Use the API to fetch data (example)
 const tradeUrl = new URL(
-  "https://www.pathofexile.com/trade/search/Ancestor/EGmMQEKS5",
+    "https://www.pathofexile.com/trade/search/Ancestor/EGmMQEKS5",
 );
 const tradeDataItems = await poeTradeFetch.poeTradeSearchUrl(
-  tradeUrl,
-  "Your POESESSID",
+    tradeUrl,
+    "Your POESESSID",
 );
 console.log("Trade Data Items:", tradeDataItems.result);
 
@@ -33,25 +33,25 @@ console.log("Trade Data Items:", tradeDataItems.result);
 // You also need to understand that different rate limits are possible for different API urls
 
 await poeTradeFetch.update({
-  leagueName: LEAGUES_NAMES.Current, // default Standard
-  userAgent: "My PoE App  your@mail.kek",
-  realm: REALMS.pc, // if need default pc
-  POESESSID: "Your POESESSID", // if need
+    leagueName: LEAGUES_NAMES.Current, // default Standard
+    userAgent: "My PoE App  your@mail.kek",
+    realm: REALMS.pc, // if need default pc
+    POESESSID: "Your POESESSID", // if need
 });
 
 const firstDelay = poeTradeFetch.httpRequest.getWaitTime(
-  RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
+    RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
 );
 await poeTradeFetch.httpRequest.delay(firstDelay);
 
 const RequestBody: RequestBodyType = {
-  query: {
-    status: {option: "online"},
-    name: "Prismweave",
-    type: "Rustic Sash",
-    stats: [{type: "and", filters: [], disabled: false}],
-  },
-  sort: {price: "asc"},
+    query: {
+        status: {option: "online"},
+        name: "Prismweave",
+        type: "Rustic Sash",
+        stats: [{type: "and", filters: [], disabled: false}],
+    },
+    sort: {price: "asc"},
 }; // just create you any query
 
 const {result, id} = await poeTradeFetch.firsRequest(RequestBody);
@@ -70,18 +70,18 @@ const {result, id} = await poeTradeFetch.firsRequest(RequestBody);
 const identifiers = result.length > 10 ? result.slice(0, 10) : result;
 
 const secondDelay = poeTradeFetch.httpRequest.getWaitTime(
-  RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST,
+    RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST,
 );
 await poeTradeFetch.httpRequest.delay(secondDelay);
 
 // here you get information about 10 listings on poe trade
 const {result: secondResult} = await poeTradeFetch.secondRequest(
-  identifiers,
-  id,
+    identifiers,
+    id,
 );
 console.log("Trade Data Items:", secondResult);
 console.log(
-  "price: ",
-  secondResult[0].listing.price.amount,
-  secondResult[0].listing.price.currency,
+    "price: ",
+    secondResult[0].listing.price.amount,
+    secondResult[0].listing.price.currency,
 );

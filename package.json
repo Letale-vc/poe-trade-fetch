@@ -1,103 +1,103 @@
 {
-  "name": "poe-trade-fetch",
-  "version": "0.0.0-development",
-  "description": "poe trade fetch",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.js",
-      "default": "./dist/esm/index.js"
+    "name": "poe-trade-fetch",
+    "version": "0.0.0-development",
+    "description": "poe trade fetch",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "require": "./dist/cjs/index.js",
+            "import": "./dist/esm/index.js",
+            "default": "./dist/esm/index.js"
+        },
+        "./*": {
+            "types": "./dist/types/*.d.ts",
+            "require": "./dist/cjs/*.js",
+            "import": "./dist/esm/*.js",
+            "default": "./dist/esm/*.js"
+        }
     },
-    "./*": {
-      "types": "./dist/types/*.d.ts",
-      "require": "./dist/cjs/*.js",
-      "import": "./dist/esm/*.js",
-      "default": "./dist/esm/*.js"
-    }
-  },
-  "typesVersions": {
-    ">=4.2": {
-      "*": [
-        "./dist/types/*"
-      ]
-    }
-  },
-  "type": "module",
-  "release": {
-    "branches": [
-      "master",
-      "dev"
+    "typesVersions": {
+        ">=4.2": {
+            "*": [
+                "./dist/types/*"
+            ]
+        }
+    },
+    "type": "module",
+    "release": {
+        "branches": [
+            "master",
+            "dev"
+        ],
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator",
+            "@semantic-release/changelog",
+            "@semantic-release/npm",
+            "@semantic-release/github"
+        ]
+    },
+    "scripts": {
+        "prebuild": "rimraf dist",
+        "build": "npm run prebuild && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.types.json && node fixTypeModule.js",
+        "lint": "eslint .",
+        "lint-fix": "eslint . --fix",
+        "format": "prettier . --write",
+        "test": "jest ./src",
+        "pub": "npm run build && npm publish",
+        "semantic-release": "semantic-release"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Letale-vc/poe-trade-fetch.git"
+    },
+    "keywords": [
+        "Path of Exile",
+        "poe",
+        "fetch"
     ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
-      "@semantic-release/npm",
-      "@semantic-release/github"
-    ]
-  },
-  "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "npm run prebuild && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.types.json && node fixTypeModule.js",
-    "lint": "eslint .",
-    "lint-fix": "eslint . --fix",
-    "format": "prettier . --write",
-    "test": "jest ./src",
-    "pub": "npm run build && npm publish",
-    "semantic-release": "semantic-release"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Letale-vc/poe-trade-fetch.git"
-  },
-  "keywords": [
-    "Path of Exile",
-    "poe",
-    "fetch"
-  ],
-  "author": "Helpless",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://www.opensource.org/licenses/mit-license.php"
+    "author": "Helpless",
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://www.opensource.org/licenses/mit-license.php"
+        },
+        {
+            "type": "Apache-2.0",
+            "url": "https://opensource.org/licenses/apache2.0.php"
+        }
+    ],
+    "bugs": {
+        "url": "https://github.com/Letale-vc/poe-trade-fetch/issues"
     },
-    {
-      "type": "Apache-2.0",
-      "url": "https://opensource.org/licenses/apache2.0.php"
+    "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
+    "dependencies": {
+        "axios": "^1.7.2",
+        "cheerio": "^1.0.0-rc.12",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/commit-analyzer": "^11.1.0",
+        "@semantic-release/github": "^9.2.6",
+        "@semantic-release/npm": "^11.0.3",
+        "@semantic-release/release-notes-generator": "^12.1.0",
+        "@types/eslint": "^8.56.10",
+        "@types/jest": "^29.5.12",
+        "@types/node": "^20.14.2",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "axios-mock-adapter": "^1.22.0",
+        "eslint": "^8.57.0",
+        "jest": "^29.7.0",
+        "prettier": "^3.3.2",
+        "rimraf": "^5.0.7",
+        "semantic-release": "^22.0.12",
+        "ts-jest": "^29.1.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.4.5"
     }
-  ],
-  "bugs": {
-    "url": "https://github.com/Letale-vc/poe-trade-fetch/issues"
-  },
-  "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
-  "dependencies": {
-    "axios": "^1.6.7",
-    "cheerio": "^1.0.0-rc.12",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^11.1.0",
-    "@semantic-release/github": "^9.2.6",
-    "@semantic-release/npm": "^11.0.3",
-    "@semantic-release/release-notes-generator": "^12.1.0",
-    "@types/eslint": "^8.56.5",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.27",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "axios-mock-adapter": "^1.22.0",
-    "eslint": "^8.57.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.2.5",
-    "rimraf": "^5.0.5",
-    "semantic-release": "^22.0.12",
-    "ts-jest": "^29.1.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.2"
-  }
 }

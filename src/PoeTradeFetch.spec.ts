@@ -224,216 +224,230 @@
 import {PoeTradeFetch} from "./PoeTradeFetch";
 import {LeagueResponseType} from "./Types/PoeLeagueResponseType.js";
 import {
-  PoeFirstResponseType,
-  PoeSecondResponseType,
+    PoeFirstResponseType,
+    PoeSecondResponseType,
 } from "./Types/PoeResponseType.js";
 import {RequestBodyType} from "./Types/TradeRequestBodyType.js";
 import {ConfigInputType} from "./Types/types.js";
 import {
-  DEFAULT_CONFIG,
-  LEAGUES_NAMES,
-  POE_API_SECOND_REQUEST,
-  REALMS,
+    DEFAULT_CONFIG,
+    LEAGUES_NAMES,
+    POE_API_SECOND_REQUEST,
+    REALMS,
 } from "./constants.js";
 import {HttpRequest} from "./httpRequest/HttpRequest.js";
 
 jest.mock("./httpRequest/HttpRequest.js");
 
 describe("PoeTradeFetch", () => {
-  let poeTradeFetch: PoeTradeFetch;
-  let mockHttpRequest: jest.Mocked<HttpRequest>;
+    let poeTradeFetch: PoeTradeFetch;
+    let mockHttpRequest: jest.Mocked<HttpRequest>;
 
-  beforeEach(() => {
-    mockHttpRequest = new HttpRequest(
-      DEFAULT_CONFIG,
-    ) as jest.Mocked<HttpRequest>;
-    (HttpRequest as jest.Mock).mockImplementation(() => mockHttpRequest);
-    poeTradeFetch = new PoeTradeFetch({userAgent: "test-app"});
-  });
-
-  describe("update", () => {
-    it("should update the configuration", async () => {
-      const newConfig: ConfigInputType = {userAgent: "test-app"};
-      await poeTradeFetch.updateConfig(newConfig);
-      expect(poeTradeFetch.config.userAgent).toBe("test-app");
-    });
-  });
-
-  describe("getInstance", () => {
-    it("should return an instance of PoeTradeFetch", () => {
-      const instance = PoeTradeFetch.getInstance({userAgent: "test-app"});
-      expect(instance).toBeInstanceOf(PoeTradeFetch);
-    });
-  });
-
-  describe("leagueNames", () => {
-    it("should return league names", async () => {
-      const leagueNames = ["League1", "League2"];
-      mockHttpRequest.get.mockResolvedValue({result: leagueNames});
-
-      const result = await poeTradeFetch.leagueList();
-      expect(result).toEqual({result: leagueNames});
-    });
-  });
-  describe("updateLeagueName", () => {
-    test("should update leagueName to Standard if current league not found", async () => {
-      const config: ConfigInputType = {
-        userAgent: "test",
-        leagueName: LEAGUES_NAMES.Current,
-        realm: REALMS.pc,
-        POESESSID: "test",
-      };
-      jest
-        .spyOn(poeTradeFetch, "getCurrentLeagueName")
-        .mockResolvedValue(undefined);
-      await poeTradeFetch.updateConfig(config);
-      await poeTradeFetch.updateLeagueName();
-      expect(poeTradeFetch.leagueName).toEqual(LEAGUES_NAMES.Standard);
+    beforeEach(() => {
+        mockHttpRequest = new HttpRequest(
+            DEFAULT_CONFIG,
+        ) as jest.Mocked<HttpRequest>;
+        (HttpRequest as jest.Mock).mockImplementation(() => mockHttpRequest);
+        poeTradeFetch = new PoeTradeFetch({userAgent: "test-app"});
     });
 
-    test("should update leagueName to current league if found", async () => {
-      const config: ConfigInputType = {
-        userAgent: "test",
-        leagueName: LEAGUES_NAMES.Current,
-        realm: REALMS.pc,
-        POESESSID: "test",
-      };
-      jest
-        .spyOn(poeTradeFetch, "getCurrentLeagueName")
-        .mockResolvedValue("testLeague");
-      await poeTradeFetch.updateConfig(config);
-      await poeTradeFetch.updateLeagueName();
-      expect(poeTradeFetch.leagueName).toEqual("testLeague");
+    describe("update", () => {
+        it("should update the configuration", async () => {
+            const newConfig: ConfigInputType = {userAgent: "test-app"};
+            await poeTradeFetch.updateConfig(newConfig);
+            expect(poeTradeFetch.config.userAgent).toBe("test-app");
+        });
     });
 
-    test("should not update leagueName if it does not include Current", async () => {
-      const config: ConfigInputType = {
-        userAgent: "test",
-        leagueName: LEAGUES_NAMES.Hardcore,
-        realm: REALMS.pc,
-        POESESSID: "test",
-      };
-      await poeTradeFetch.updateConfig(config);
-      await poeTradeFetch.updateLeagueName();
-      expect(poeTradeFetch.leagueName).toEqual(LEAGUES_NAMES.Hardcore);
-    });
-  });
-
-  describe("getCurrentLeagueName", () => {
-    it("should return current league name", async () => {
-      const leagueList: LeagueResponseType = [
-        {
-          id: "1",
-          realm: "pc",
-          url: "url1",
-          startAt: "2022-01-01T00:00:00Z",
-          endAt: "2222-01-01T00:00:00Z",
-          description: "description1",
-          category: {id: "LeagueId1", current: true},
-          registerAt: null,
-          delveEvent: true,
-          rules: [
-            {id: "rule1", name: "ruleName1", description: "ruleDescription1"},
-          ],
-          event: true,
-        },
-        {
-          id: "2",
-          realm: "pc",
-          url: "url2",
-          startAt: "2022-01-01T00:00:00Z",
-          endAt: null,
-          description: "description2",
-          category: {id: "LeagueId2"},
-          registerAt: null,
-          delveEvent: false,
-          rules: [
-            {id: "rule2", name: "ruleName2", description: "ruleDescription2"},
-          ],
-          event: false,
-        },
-      ];
-      mockHttpRequest.get.mockResolvedValue(leagueList);
-
-      const result = await poeTradeFetch.getCurrentLeagueName();
-      expect(result).toBe("LeagueId1");
-    });
-  });
-
-  describe("getTradeDataItems", () => {
-    it("should return trade data items", async () => {
-      const tradeDataItems = ["Item1", "Item2"];
-      mockHttpRequest.get.mockResolvedValue({result: tradeDataItems});
-
-      const result = await poeTradeFetch.getTradeDataItems();
-      expect(result).toEqual({result: tradeDataItems});
-    });
-  });
-
-  describe("firsRequest", () => {
-    it("should make a POST request to the correct path", async () => {
-      const requestQuery: RequestBodyType = {
-        query: {status: {option: "online"}},
-      };
-      const response: PoeFirstResponseType = {
-        id: "query-id",
-        result: ["id1", "id2"],
-      } as PoeFirstResponseType;
-      mockHttpRequest.post.mockResolvedValue(response);
-
-      const result = await poeTradeFetch.firsRequest(requestQuery);
-      expect(result).toEqual(response);
-
-      expect(mockHttpRequest.post).toHaveBeenCalledWith(
-        expect.stringContaining(poeTradeFetch.leagueName),
-        requestQuery,
-        undefined,
-      );
-    });
-  });
-
-  describe("secondRequest", () => {
-    it("should make a GET request to the correct path with pc realm", async () => {
-      const arrayIds = ["id1", "id2", "id3"];
-      const queryId = "query-id";
-      const response: PoeSecondResponseType = {result: []};
-      mockHttpRequest.get.mockResolvedValue(response);
-
-      const result = await poeTradeFetch.secondRequest(arrayIds, queryId);
-      expect(result).toEqual(response);
-
-      const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
-        ",",
-      )}?query=${queryId}`;
-      expect(mockHttpRequest.get).toHaveBeenCalledWith(expectedPath, undefined);
+    describe("getInstance", () => {
+        it("should return an instance of PoeTradeFetch", () => {
+            const instance = PoeTradeFetch.getInstance({userAgent: "test-app"});
+            expect(instance).toBeInstanceOf(PoeTradeFetch);
+        });
     });
 
-    it("should make a GET request to the correct path with non-pc realm", async () => {
-      const arrayIds = ["id1", "id2", "id3"];
-      const queryId = "query-id";
-      const response: PoeSecondResponseType = {
-        result: [],
-      } as PoeSecondResponseType;
-      mockHttpRequest.get.mockResolvedValue(response);
-      poeTradeFetch.config.realm = REALMS.xbox; // set non-pc realm
+    describe("leagueNames", () => {
+        it("should return league names", async () => {
+            const leagueNames = ["League1", "League2"];
+            mockHttpRequest.get.mockResolvedValue({result: leagueNames});
 
-      const result = await poeTradeFetch.secondRequest(arrayIds, queryId);
-      expect(result).toEqual(response);
+            const result = await poeTradeFetch.leagueList();
+            expect(result).toEqual({result: leagueNames});
+        });
+    });
+    describe("updateLeagueName", () => {
+        test("should update leagueName to Standard if current league not found", async () => {
+            const config: ConfigInputType = {
+                userAgent: "test",
+                leagueName: LEAGUES_NAMES.Current,
+                realm: REALMS.pc,
+                POESESSID: "test",
+            };
+            jest.spyOn(poeTradeFetch, "getCurrentLeagueName").mockResolvedValue(
+                undefined,
+            );
+            await poeTradeFetch.updateConfig(config);
+            await poeTradeFetch.updateLeagueName();
+            expect(poeTradeFetch.leagueName).toEqual(LEAGUES_NAMES.Standard);
+        });
 
-      const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
-        ",",
-      )}?query=${queryId}&realm=${REALMS.xbox}`;
-      expect(mockHttpRequest.get).toHaveBeenCalledWith(expectedPath, undefined);
+        test("should update leagueName to current league if found", async () => {
+            const config: ConfigInputType = {
+                userAgent: "test",
+                leagueName: LEAGUES_NAMES.Current,
+                realm: REALMS.pc,
+                POESESSID: "test",
+            };
+            jest.spyOn(poeTradeFetch, "getCurrentLeagueName").mockResolvedValue(
+                "testLeague",
+            );
+            await poeTradeFetch.updateConfig(config);
+            await poeTradeFetch.updateLeagueName();
+            expect(poeTradeFetch.leagueName).toEqual("testLeague");
+        });
+
+        test("should not update leagueName if it does not include Current", async () => {
+            const config: ConfigInputType = {
+                userAgent: "test",
+                leagueName: LEAGUES_NAMES.Hardcore,
+                realm: REALMS.pc,
+                POESESSID: "test",
+            };
+            await poeTradeFetch.updateConfig(config);
+            await poeTradeFetch.updateLeagueName();
+            expect(poeTradeFetch.leagueName).toEqual(LEAGUES_NAMES.Hardcore);
+        });
     });
 
-    it("should throw an error if the request fails", async () => {
-      const arrayIds = ["id1", "id2", "id3"];
-      const queryId = "query-id";
-      mockHttpRequest.get.mockRejectedValue(new Error());
+    describe("getCurrentLeagueName", () => {
+        it("should return current league name", async () => {
+            const leagueList: LeagueResponseType = [
+                {
+                    id: "1",
+                    realm: "pc",
+                    url: "url1",
+                    startAt: "2022-01-01T00:00:00Z",
+                    endAt: "2222-01-01T00:00:00Z",
+                    description: "description1",
+                    category: {id: "LeagueId1", current: true},
+                    registerAt: null,
+                    delveEvent: true,
+                    rules: [
+                        {
+                            id: "rule1",
+                            name: "ruleName1",
+                            description: "ruleDescription1",
+                        },
+                    ],
+                    event: true,
+                },
+                {
+                    id: "2",
+                    realm: "pc",
+                    url: "url2",
+                    startAt: "2022-01-01T00:00:00Z",
+                    endAt: null,
+                    description: "description2",
+                    category: {id: "LeagueId2"},
+                    registerAt: null,
+                    delveEvent: false,
+                    rules: [
+                        {
+                            id: "rule2",
+                            name: "ruleName2",
+                            description: "ruleDescription2",
+                        },
+                    ],
+                    event: false,
+                },
+            ];
+            mockHttpRequest.get.mockResolvedValue(leagueList);
 
-      await expect(
-        poeTradeFetch.secondRequest(arrayIds, queryId),
-      ).rejects.toThrow();
+            const result = await poeTradeFetch.getCurrentLeagueName();
+            expect(result).toBe("LeagueId1");
+        });
     });
-  });
+
+    describe("getTradeDataItems", () => {
+        it("should return trade data items", async () => {
+            const tradeDataItems = ["Item1", "Item2"];
+            mockHttpRequest.get.mockResolvedValue({result: tradeDataItems});
+
+            const result = await poeTradeFetch.getTradeDataItems();
+            expect(result).toEqual({result: tradeDataItems});
+        });
+    });
+
+    describe("firsRequest", () => {
+        it("should make a POST request to the correct path", async () => {
+            const requestQuery: RequestBodyType = {
+                query: {status: {option: "online"}},
+            };
+            const response: PoeFirstResponseType = {
+                id: "query-id",
+                result: ["id1", "id2"],
+            } as PoeFirstResponseType;
+            mockHttpRequest.post.mockResolvedValue(response);
+
+            const result = await poeTradeFetch.firsRequest(requestQuery);
+            expect(result).toEqual(response);
+
+            expect(mockHttpRequest.post).toHaveBeenCalledWith(
+                expect.stringContaining(poeTradeFetch.leagueName),
+                requestQuery,
+                undefined,
+            );
+        });
+    });
+
+    describe("secondRequest", () => {
+        it("should make a GET request to the correct path with pc realm", async () => {
+            const arrayIds = ["id1", "id2", "id3"];
+            const queryId = "query-id";
+            const response: PoeSecondResponseType = {result: []};
+            mockHttpRequest.get.mockResolvedValue(response);
+
+            const result = await poeTradeFetch.secondRequest(arrayIds, queryId);
+            expect(result).toEqual(response);
+
+            const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
+                ",",
+            )}?query=${queryId}`;
+            expect(mockHttpRequest.get).toHaveBeenCalledWith(
+                expectedPath,
+                undefined,
+            );
+        });
+
+        it("should make a GET request to the correct path with non-pc realm", async () => {
+            const arrayIds = ["id1", "id2", "id3"];
+            const queryId = "query-id";
+            const response: PoeSecondResponseType = {
+                result: [],
+            } as PoeSecondResponseType;
+            mockHttpRequest.get.mockResolvedValue(response);
+            poeTradeFetch.config.realm = REALMS.xbox; // set non-pc realm
+
+            const result = await poeTradeFetch.secondRequest(arrayIds, queryId);
+            expect(result).toEqual(response);
+
+            const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
+                ",",
+            )}?query=${queryId}&realm=${REALMS.xbox}`;
+            expect(mockHttpRequest.get).toHaveBeenCalledWith(
+                expectedPath,
+                undefined,
+            );
+        });
+
+        it("should throw an error if the request fails", async () => {
+            const arrayIds = ["id1", "id2", "id3"];
+            const queryId = "query-id";
+            mockHttpRequest.get.mockRejectedValue(new Error());
+
+            await expect(
+                poeTradeFetch.secondRequest(arrayIds, queryId),
+            ).rejects.toThrow();
+        });
+    });
 });

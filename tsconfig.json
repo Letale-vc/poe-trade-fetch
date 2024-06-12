@@ -1,24 +1,24 @@
 {
-  "compilerOptions": {
-    "rootDir": "./src",
-    "target": "ESNext",
-    // "module": "ES6",
-    "moduleResolution": "Node10",
-    "removeComments": true,
-    "allowJs": true,
-    "strict": true,
-    "esModuleInterop": true
-  },
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-    "dist",
-    "coverage",
-    "tests",
-    "index.d.ts",
-    "example",
-    "jest.config.js",
-    ".eslintrc.cjs",
-    "fixTypeModule.js"
-  ]
+    "compilerOptions": {
+        "rootDir": "./src",
+        "target": "ESNext",
+        // "module": "ES6",
+        "moduleResolution": "Node10",
+        "removeComments": true,
+        "allowJs": true,
+        "strict": true,
+        "esModuleInterop": true
+    },
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts",
+        "dist",
+        "coverage",
+        "tests",
+        "index.d.ts",
+        "example",
+        "jest.config.js",
+        ".eslintrc.cjs",
+        "fixTypeModule.js"
+    ]
 }
