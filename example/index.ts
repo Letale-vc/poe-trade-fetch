@@ -5,13 +5,14 @@ import {
     REALMS,
     type RequestBodyType,
 } from "../src/index.js";
+import { delay } from "../src/utility/delay.js";
 
 const poeTradeFetch = new PoeTradeFetch({
     leagueName: LEAGUES_NAMES.Current, // League name (default is 'Standard')
     userAgent: "My PoE App  your@mail.kek",
     realm: REALMS.pc, // Realm (default is pc)
 });
-await poeTradeFetch.update();
+await poeTradeFetch.init();
 
 // Use the API to fetch data (example)
 const tradeUrl = new URL(
@@ -32,17 +33,17 @@ console.log("Trade Data Items:", tradeDataItems.result);
 // You can also set  POESESSID, this will increase the number of requests per minute.
 // You also need to understand that different rate limits are possible for different API urls
 
-await poeTradeFetch.update({
+await poeTradeFetch.updateConfig({
     leagueName: LEAGUES_NAMES.Current, // default Standard
     userAgent: "My PoE App  your@mail.kek",
     realm: REALMS.pc, // if need default pc
     POESESSID: "Your POESESSID", // if need
 });
 
-const firstDelay = poeTradeFetch.httpRequest.getWaitTime(
+const firstDelay = poeTradeFetch.httpRequest.rateLimiter.getWaitTime(
     RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
 );
-await poeTradeFetch.httpRequest.delay(firstDelay);
+await delay(firstDelay);
 
 const RequestBody: RequestBodyType = {
     query: {
@@ -69,10 +70,10 @@ const { result, id } = await poeTradeFetch.firsRequest(RequestBody);
 // if you give more than 10 IDs, the PoE API will give an error
 const identifiers = result.length > 10 ? result.slice(0, 10) : result;
 
-const secondDelay = poeTradeFetch.httpRequest.getWaitTime(
+const secondDelay = poeTradeFetch.httpRequest.rateLimiter.getWaitTime(
     RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST,
 );
-await poeTradeFetch.httpRequest.delay(secondDelay);
+await delay(secondDelay);
 
 // here you get information about 10 listings on poe trade
 const { result: secondResult } = await poeTradeFetch.secondRequest(
