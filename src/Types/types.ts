@@ -1,4 +1,8 @@
-import {LEAGUES_NAMES, RATE_LIMIT_STATE_KEYS, REALMS} from "../constants.js";
+import type {
+    LEAGUES_NAMES,
+    RATE_LIMIT_STATE_KEYS,
+    REALMS,
+} from "../constants.js";
 
 export type ConfigInputType = Partial<ConfigType> &
     Pick<ConfigType, "userAgent">;

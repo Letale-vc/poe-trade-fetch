@@ -1,5 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
-import {HttpRequest} from "./HttpRequest.js";
+import type { RateStateLimitType } from "../Types/index.js";
 import {
     DEFAULT_CONFIG,
     POE_API_BASE_URL,
@@ -7,10 +7,10 @@ import {
     POE_API_SECOND_REQUEST,
     RATE_LIMIT_STATE_KEYS,
 } from "../constants.js";
-import {RateStateLimitType} from "../Types/index.js";
-import {delay} from "../utility/utility.js";
+import { delay } from "../utility/delay.js";
+import { HttpRequest } from "./HttpRequest.js";
 
-jest.mock("../utility/utility.js", () => ({
+jest.mock("../utility/delay.js", () => ({
     delay: jest.fn().mockImplementation(() => Promise.resolve()),
 }));
 
@@ -53,32 +53,32 @@ describe("HttpRequest", () => {
 
     test("should set POESESSID as default", () => {
         httpRequest.setPoesessidAsDefault("test-poesessid");
-        expect(
-            httpRequest.axiosInstance.defaults.headers.common["Cookie"],
-        ).toBe("POESESSID=test-poesessid");
+        expect(httpRequest.axiosInstance.defaults.headers.common.Cookie).toBe(
+            "POESESSID=test-poesessid",
+        );
     });
 
     test("should make a GET request and return the response data", async () => {
-        mockAxios.onGet("/test").reply(200, {data: "test"});
+        mockAxios.onGet("/test").reply(200, { data: "test" });
         const data = await httpRequest.get("/test");
-        expect(data).toEqual({data: "test"});
+        expect(data).toEqual({ data: "test" });
     });
 
     test("should make a POST request and return the response data", async () => {
-        mockAxios.onPost("/test").reply(200, {data: "test"});
-        const data = await httpRequest.post("/test", {key: "value"});
+        mockAxios.onPost("/test").reply(200, { data: "test" });
+        const data = await httpRequest.post("/test", { key: "value" });
 
-        expect(data).toEqual({data: "test"});
+        expect(data).toEqual({ data: "test" });
     });
 
     test("should get the correct rate limit key", () => {
-        const firstRequestKey = httpRequest["getRateLimitKey"](
+        const firstRequestKey = httpRequest.getRateLimitKey(
             POE_API_FIRST_REQUEST,
         );
-        const secondRequestKey = httpRequest["getRateLimitKey"](
+        const secondRequestKey = httpRequest.getRateLimitKey(
             POE_API_SECOND_REQUEST,
         );
-        const otherKey = httpRequest["getRateLimitKey"]("/other");
+        const otherKey = httpRequest.getRateLimitKey("/other");
 
         expect(firstRequestKey).toBe(
             RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
@@ -92,7 +92,7 @@ describe("HttpRequest", () => {
     describe("setupResponseInterceptors", () => {
         it("should correctly set rate limit information when response interceptors are set up", async () => {
             const mockResponse = {
-                config: {url: "api/trade/search/League"},
+                config: { url: "api/trade/search/League" },
                 headers: {
                     "x-rate-limit-ip": "60:60:60",
                     "x-rate-limit-ip-state": "0:60:60",
@@ -114,7 +114,7 @@ describe("HttpRequest", () => {
             await httpRequest.post("api/trade/search/League");
 
             expect(
-                httpRequest.rateLimiter.requestStatesRateLimitsMap.get(
+                httpRequest.rateLimiter.rateLimitsState.get(
                     RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
                 ),
             ).toEqual(rateLimits);
@@ -122,7 +122,7 @@ describe("HttpRequest", () => {
 
         it("should handle response without rate limit headers", async () => {
             const mockResponse = {
-                config: {url: POE_API_FIRST_REQUEST},
+                config: { url: POE_API_FIRST_REQUEST },
                 headers: {},
             };
 
@@ -150,47 +150,47 @@ describe("HttpRequest", () => {
 
     describe("setupRequestInterceptors", () => {
         it("should delay the request if useRateLimitDelay is true", async () => {
-            const delaySpy = jest.spyOn({delay}, "delay");
+            const delaySpy = jest.spyOn({ delay }, "delay");
             httpRequest.useRateLimitDelay = true;
             httpRequest.rateLimiter.getWaitTime = jest
                 .fn()
                 .mockReturnValue(1000);
-            httpRequest.rateLimiter.canMakeRequest = jest
+            httpRequest.rateLimiter.isCanMakeRequest = jest
                 .fn()
                 .mockReturnValue(true);
-            mockAxios.onGet("/test").reply(200, {data: "test"});
+            mockAxios.onGet("/test").reply(200, { data: "test" });
             await httpRequest.get("/test");
 
             expect(delaySpy).toHaveBeenCalledWith(1000);
         });
 
         it("should not delay the request if useRateLimitDelay is false", async () => {
-            const delaySpy = jest.spyOn({delay}, "delay");
+            const delaySpy = jest.spyOn({ delay }, "delay");
             httpRequest.useRateLimitDelay = false;
 
-            mockAxios.onGet("/test").reply(200, {data: "test"});
+            mockAxios.onGet("/test").reply(200, { data: "test" });
             await httpRequest.get("/test");
 
             expect(delaySpy).not.toHaveBeenCalled();
         });
 
         it("should throw an error if the rate limit is exceeded", async () => {
-            httpRequest.rateLimiter.canMakeRequest = jest
+            httpRequest.rateLimiter.isCanMakeRequest = jest
                 .fn()
                 .mockReturnValue(false);
 
-            mockAxios.onGet("/test").reply(200, {data: "test"});
+            mockAxios.onGet("/test").reply(200, { data: "test" });
             await expect(httpRequest.get("/test")).rejects.toThrow(
                 "Rate limit exceeded",
             );
         });
 
         it("should not throw an error if the rate limit is not exceeded", async () => {
-            httpRequest.rateLimiter.canMakeRequest = jest
+            httpRequest.rateLimiter.isCanMakeRequest = jest
                 .fn()
                 .mockReturnValue(true);
 
-            mockAxios.onGet("/test").reply(200, {data: "test"});
+            mockAxios.onGet("/test").reply(200, { data: "test" });
             await expect(httpRequest.get("/test")).resolves.not.toThrow();
         });
     });

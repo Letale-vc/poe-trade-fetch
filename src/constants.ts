@@ -1,4 +1,4 @@
-import { ConfigType } from "./Types";
+import type { ConfigType } from "./Types";
 
 //  PoE API URLs -----------------------------
 export const POE_API_BASE_URL = "https://www.pathofexile.com/";

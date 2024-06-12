@@ -1,17 +1,17 @@
-import { RateStateLimitType } from "../Types/types";
+import type { RateStateLimitType } from "../Types/types";
 
 export class RateLimiter {
-    requestStatesRateLimitsMap = new Map<string, RateStateLimitType>();
+    rateLimitsState = new Map<string, RateStateLimitType>();
 
     setRateLimitInfo(key: string, rateLimits: RateStateLimitType) {
-        this.requestStatesRateLimitsMap.set(key, rateLimits);
+        this.rateLimitsState.set(key, rateLimits);
     }
 
     isCanMakeRequest(rateLimitKey: string): boolean {
-        return this.getWaitTime(rateLimitKey) === 0 ? true : false;
+        return this.getWaitTime(rateLimitKey) === 0;
     }
 
-    stateCheck(limitState: Array<number[]>, limit: Array<number[]>) {
+    calculateWaitTime(limitState: Array<number[]>, limit: Array<number[]>) {
         return limitState.reduce((acc, [current, period], index) => {
             let time = acc;
             const [maxHits] = limit[index];
@@ -24,22 +24,21 @@ export class RateLimiter {
     }
 
     getWaitTime(rateLimitKey: string): number {
-        const rateLimitInfo = this.requestStatesRateLimitsMap.get(rateLimitKey);
+        const rateLimitInfo = this.rateLimitsState.get(rateLimitKey);
         if (rateLimitInfo === undefined) {
             return 0;
         }
+
         const lastRequestTime = rateLimitInfo.lastResponseTime;
         const differenceTimeInSec = (Date.now() - lastRequestTime) / 1000;
-
-        const accWaitTime = this.stateCheck(
+        const accWaitTime = this.calculateWaitTime(
             rateLimitInfo.accountLimitState,
             rateLimitInfo.accountLimit,
         );
-        const ipWaitTime = this.stateCheck(
+        const ipWaitTime = this.calculateWaitTime(
             rateLimitInfo.ipLimitState,
             rateLimitInfo.ipLimit,
         );
-
         let waitTime = Math.max(accWaitTime, ipWaitTime);
 
         waitTime = waitTime - differenceTimeInSec;

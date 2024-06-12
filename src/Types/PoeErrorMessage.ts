@@ -1,4 +1,4 @@
-import { POE_ERROR_CODES } from "../constants";
+import type { POE_ERROR_CODES } from "../constants";
 
 export interface PoeErrorMessage {
     error: {

@@ -1,9 +1,9 @@
 import {
     LEAGUES_NAMES,
+    PoeTradeFetch,
     RATE_LIMIT_STATE_KEYS,
     REALMS,
-    PoeTradeFetch,
-    RequestBodyType,
+    type RequestBodyType,
 } from "../src/index.js";
 
 const poeTradeFetch = new PoeTradeFetch({
@@ -46,15 +46,15 @@ await poeTradeFetch.httpRequest.delay(firstDelay);
 
 const RequestBody: RequestBodyType = {
     query: {
-        status: {option: "online"},
+        status: { option: "online" },
         name: "Prismweave",
         type: "Rustic Sash",
-        stats: [{type: "and", filters: [], disabled: false}],
+        stats: [{ type: "and", filters: [], disabled: false }],
     },
-    sort: {price: "asc"},
+    sort: { price: "asc" },
 }; // just create you any query
 
-const {result, id} = await poeTradeFetch.firsRequest(RequestBody);
+const { result, id } = await poeTradeFetch.firsRequest(RequestBody);
 // You take something like this response
 // {
 // 	"id": "prX3f0",
@@ -75,7 +75,7 @@ const secondDelay = poeTradeFetch.httpRequest.getWaitTime(
 await poeTradeFetch.httpRequest.delay(secondDelay);
 
 // here you get information about 10 listings on poe trade
-const {result: secondResult} = await poeTradeFetch.secondRequest(
+const { result: secondResult } = await poeTradeFetch.secondRequest(
     identifiers,
     id,
 );

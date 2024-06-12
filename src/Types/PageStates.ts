@@ -61,7 +61,7 @@ export interface StatValueType {
 export interface StatFilterType {
     id: string;
     disabled: boolean;
-    value: StatValueType | {option: number};
+    value: StatValueType | { option: number };
 }
 
 export interface StatGroupType {

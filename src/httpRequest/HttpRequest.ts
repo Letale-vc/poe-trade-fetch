@@ -1,18 +1,24 @@
 import axios, {
-    AxiosInstance,
-    AxiosRequestConfig,
-    AxiosResponse,
-    CreateAxiosDefaults,
+    type AxiosInstance,
+    type AxiosRequestConfig,
+    type AxiosResponse,
+    type CreateAxiosDefaults,
 } from "axios";
-import { ConfigType, RateLimitKeys, RateStateLimitType } from "../Types/types.js";
+import { PoeTradeFetch } from "../PoeTradeFetch.js";
+import type {
+    ConfigType,
+    RateLimitKeys,
+    RateStateLimitType,
+} from "../Types/types.js";
 import {
     POE_API_BASE_URL,
     POE_API_FIRST_REQUEST,
     POE_API_SECOND_REQUEST,
     RATE_LIMIT_STATE_KEYS,
 } from "../constants.js";
+import { PoeTradeFetchError } from "../poeTradeFetchError.js";
 import { RateLimiter } from "../rateLimiter/RateLimiter.js";
-import { delay } from "../utility/utility.js";
+import { delay } from "../utility/delay.js";
 
 export class HttpRequest {
     axiosInstance: AxiosInstance;
@@ -46,7 +52,7 @@ export class HttpRequest {
     }
 
     setPoesessidAsDefault(POESESSID: string | null) {
-        this.axiosInstance.defaults.headers.common["Cookie"] =
+        this.axiosInstance.defaults.headers.common.Cookie =
             POESESSID === null ? "" : `POESESSID=${POESESSID}`;
     }
 
@@ -94,7 +100,8 @@ export class HttpRequest {
         }
         return updatedState;
     }
-    private getRateLimitKey(url: string | undefined): string {
+
+    getRateLimitKey(url: string | undefined): string {
         let key: RateLimitKeys = RATE_LIMIT_STATE_KEYS.OTHER;
         if (url) {
             if (
@@ -110,16 +117,21 @@ export class HttpRequest {
         return key;
     }
     private setupResponseInterceptors() {
-        this.axiosInstance.interceptors.response.use(res => {
-            let limitKey = this.getRateLimitKey(res.config.url);
-            if (res.headers["x-proxy-host"]) {
-                limitKey = `${limitKey}-${res.headers["x-proxy-host"]}`;
-            }
+        this.axiosInstance.interceptors.response.use(
+            res => {
+                let limitKey = this.getRateLimitKey(res.config.url);
+                if (res.headers["x-proxy-host"]) {
+                    limitKey = `${limitKey}-${res.headers["x-proxy-host"]}`;
+                }
 
-            const rateLimits = this.getNewRateLimits(res);
-            this.rateLimiter.setRateLimitInfo(limitKey, rateLimits);
-            return res;
-        });
+                const rateLimits = this.getNewRateLimits(res);
+                this.rateLimiter.setRateLimitInfo(limitKey, rateLimits);
+                return res;
+            },
+            error => {
+                throw new PoeTradeFetchError(error);
+            },
+        );
     }
 
     async get<T>(url: string, config?: AxiosRequestConfig) {

@@ -11,7 +11,7 @@ const jestConfig = {
         "^(\\.{1,2}/.*)\\.js$": "$1",
     },
     transform: {
-        "^.+\\.[tj]sx?$": ["ts-jest", {useESM: true}],
+        "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true }],
     },
 };
 

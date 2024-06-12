@@ -1,20 +1,24 @@
-import {AxiosRequestConfig} from "axios";
+import type { AxiosRequestConfig } from "axios";
 import * as cheerio from "cheerio";
-import {ExchangeResponseType} from "./Types/ExchangeResponseType.js";
-import {
+import type { ExchangeResponseType } from "./Types/ExchangeResponseType.js";
+import type {
     ExchangeStateType,
     PageStatesType,
     SearchStateType,
 } from "./Types/PageStates.js";
-import {LeagueResponseType} from "./Types/PoeLeagueResponseType.js";
-import {
+import type { LeagueResponseType } from "./Types/PoeLeagueResponseType.js";
+import type {
     PoeFirstResponseType,
     PoeSecondResponseType,
     PoeTradeDataItemsResponseType,
 } from "./Types/PoeResponseType.js";
-import {TradeExchangeRequestType} from "./Types/TradeExchangeRequestBodyType.js";
-import {RequestBodyType} from "./Types/TradeRequestBodyType.js";
-import {ConfigInputType, ConfigType, ConfigUpdateType} from "./Types/types.js";
+import type { TradeExchangeRequestType } from "./Types/TradeExchangeRequestBodyType.js";
+import type { RequestBodyType } from "./Types/TradeRequestBodyType.js";
+import type {
+    ConfigInputType,
+    ConfigType,
+    ConfigUpdateType,
+} from "./Types/types.js";
 import {
     DEFAULT_CONFIG,
     LEAGUES_NAMES,
@@ -26,7 +30,7 @@ import {
     POE_SEARCH_PAGE_URL,
     REALMS,
 } from "./constants.js";
-import {HttpRequest} from "./httpRequest/HttpRequest.js";
+import { HttpRequest } from "./httpRequest/HttpRequest.js";
 
 export class PoeTradeFetch {
     static instance: PoeTradeFetch;
@@ -35,18 +39,17 @@ export class PoeTradeFetch {
     httpRequest: HttpRequest;
 
     constructor(config: ConfigInputType) {
-        // Об'єднання конфігурації за замовчуванням з переданою конфігурацією
-        this.config = {...this.config, ...config};
+        this.config = { ...this.config, ...config };
         this.leagueName = LEAGUES_NAMES.Standard;
         this.httpRequest = new HttpRequest(this.config);
     }
-    // constructor END
+
     async init() {
         await this.updateLeagueName();
     }
-    // Метод для оновлення конфігурації
+
     async updateConfig(config: ConfigUpdateType = {}) {
-        this.config = {...this.config, ...config};
+        this.config = { ...this.config, ...config };
         this.httpRequest.updateConfig(this.config);
         await this.updateLeagueName();
     }
@@ -70,7 +73,6 @@ export class PoeTradeFetch {
         }
     }
 
-    // Метод для отримання єдиного екземпляра класу
     static getInstance(config: ConfigInputType): PoeTradeFetch {
         if (!PoeTradeFetch.instance) {
             PoeTradeFetch.instance = new PoeTradeFetch(config);
@@ -78,34 +80,28 @@ export class PoeTradeFetch {
         return PoeTradeFetch.instance;
     }
 
-    // Метод для отримання списку доступних ліг
     async leagueList(): Promise<LeagueResponseType> {
         return await this.httpRequest.get<LeagueResponseType>(
             POE_API_DATA_LEAGUES_URL,
         );
     }
 
-    // Метод для отримання назви поточної ліги
     async getCurrentLeagueName(): Promise<string | undefined> {
         const leagueList = await this.leagueList();
         return leagueList.find(el => el.category.current === true)?.category.id;
     }
 
-    // Метод для отримання інформації про предмети
     async getTradeDataItems(): Promise<PoeTradeDataItemsResponseType> {
         return await this.httpRequest.get<PoeTradeDataItemsResponseType>(
             POE_API_TRADE_DATA_ITEMS_URL,
         );
     }
 
-    // Перший запит, щоб отримати ідентифікатори предметів, розташованих на торгівельній платформі
     async firsRequest(
         requestQuery: RequestBodyType,
         config?: AxiosRequestConfig,
     ): Promise<PoeFirstResponseType> {
-        // Додаємо лігу до URL
         let path = POE_API_FIRST_REQUEST.replace(":league", this.leagueName);
-        // Замінюємо :realm на значення конфігурації realm для не-PC реалмів
         path =
             this.config.realm === REALMS.pc
                 ? path.replace("/:realm", "")
@@ -118,7 +114,6 @@ export class PoeTradeFetch {
         );
     }
 
-    // Другий запит, для отримання інформації про предмети за їх ідентифікаторами
     async secondRequest(
         arrayIds: string[],
         queryId: string,
@@ -127,9 +122,11 @@ export class PoeTradeFetch {
         let basePath = POE_API_SECOND_REQUEST;
         basePath += arrayIds.join(",");
         basePath += `?query=${queryId}`;
+
         if (this.config.realm !== REALMS.pc) {
             basePath += `&realm=${this.config.realm}`;
         }
+
         return await this.httpRequest.get<PoeSecondResponseType>(
             basePath,
             config,
@@ -158,7 +155,7 @@ export class PoeTradeFetch {
     ): Promise<ExchangeResponseType> {
         const queryId = this.getQueryIdInTradeUrl(url);
         const page = await this.getTradePage(queryId, poesessid);
-        const {state} = this.getPoeTradePageState<ExchangeStateType>(page);
+        const { state } = this.getPoeTradePageState<ExchangeStateType>(page);
         const body = this.createExchangeBody(state);
 
         return await this.exchangeRequest(body);
@@ -167,11 +164,11 @@ export class PoeTradeFetch {
     createExchangeBody(state: ExchangeStateType): TradeExchangeRequestType {
         const transformedData: TradeExchangeRequestType = {
             query: {
-                status: {option: "online"},
+                status: { option: "online" },
                 have: Object.keys(state.exchange.have),
                 want: Object.keys(state.exchange.want),
             },
-            sort: {have: "asc"},
+            sort: { have: "asc" },
             engine: "new",
         };
         if ("account" in state.exchange) {
@@ -197,7 +194,7 @@ export class PoeTradeFetch {
         const page = await this.getTradePage(queryId, poesessid);
         const requestBody = this.createSearchRequestBody(page);
 
-        const {result} = await this.firsRequest(requestBody);
+        const { result } = await this.firsRequest(requestBody);
 
         const identifiers = result.length > 10 ? result.slice(0, 10) : result;
 
@@ -210,7 +207,7 @@ export class PoeTradeFetch {
         const addLeaguePath = baseUrl.replace(":league", this.leagueName);
         const addIdPath = addLeaguePath.replace(":id", queryId);
         const config: AxiosRequestConfig | undefined = poesessid
-            ? {headers: {Cookie: `POESESSID=${poesessid}`}}
+            ? { headers: { Cookie: `POESESSID=${poesessid}` } }
             : undefined;
         return await this.httpRequest.get<string>(addIdPath, config);
     }
@@ -224,10 +221,10 @@ export class PoeTradeFetch {
 
     // Отримання об'єкту тіла запиту для першого запиту
     createSearchRequestBody(page: string): RequestBodyType {
-        const {state} = this.getPoeTradePageState(page);
+        const { state } = this.getPoeTradePageState(page);
         return {
             query: state,
-            sort: {price: "asc"},
+            sort: { price: "asc" },
         };
     }
 

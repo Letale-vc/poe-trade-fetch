@@ -221,21 +221,21 @@
 //   });
 // });
 
-import {PoeTradeFetch} from "./PoeTradeFetch";
-import {LeagueResponseType} from "./Types/PoeLeagueResponseType.js";
-import {
+import { PoeTradeFetch } from "./PoeTradeFetch";
+import type { LeagueResponseType } from "./Types/PoeLeagueResponseType.js";
+import type {
     PoeFirstResponseType,
     PoeSecondResponseType,
 } from "./Types/PoeResponseType.js";
-import {RequestBodyType} from "./Types/TradeRequestBodyType.js";
-import {ConfigInputType} from "./Types/types.js";
+import type { RequestBodyType } from "./Types/TradeRequestBodyType.js";
+import type { ConfigInputType } from "./Types/types.js";
 import {
     DEFAULT_CONFIG,
     LEAGUES_NAMES,
     POE_API_SECOND_REQUEST,
     REALMS,
 } from "./constants.js";
-import {HttpRequest} from "./httpRequest/HttpRequest.js";
+import { HttpRequest } from "./httpRequest/HttpRequest.js";
 
 jest.mock("./httpRequest/HttpRequest.js");
 
@@ -248,12 +248,12 @@ describe("PoeTradeFetch", () => {
             DEFAULT_CONFIG,
         ) as jest.Mocked<HttpRequest>;
         (HttpRequest as jest.Mock).mockImplementation(() => mockHttpRequest);
-        poeTradeFetch = new PoeTradeFetch({userAgent: "test-app"});
+        poeTradeFetch = new PoeTradeFetch({ userAgent: "test-app" });
     });
 
     describe("update", () => {
         it("should update the configuration", async () => {
-            const newConfig: ConfigInputType = {userAgent: "test-app"};
+            const newConfig: ConfigInputType = { userAgent: "test-app" };
             await poeTradeFetch.updateConfig(newConfig);
             expect(poeTradeFetch.config.userAgent).toBe("test-app");
         });
@@ -261,7 +261,9 @@ describe("PoeTradeFetch", () => {
 
     describe("getInstance", () => {
         it("should return an instance of PoeTradeFetch", () => {
-            const instance = PoeTradeFetch.getInstance({userAgent: "test-app"});
+            const instance = PoeTradeFetch.getInstance({
+                userAgent: "test-app",
+            });
             expect(instance).toBeInstanceOf(PoeTradeFetch);
         });
     });
@@ -269,10 +271,10 @@ describe("PoeTradeFetch", () => {
     describe("leagueNames", () => {
         it("should return league names", async () => {
             const leagueNames = ["League1", "League2"];
-            mockHttpRequest.get.mockResolvedValue({result: leagueNames});
+            mockHttpRequest.get.mockResolvedValue({ result: leagueNames });
 
             const result = await poeTradeFetch.leagueList();
-            expect(result).toEqual({result: leagueNames});
+            expect(result).toEqual({ result: leagueNames });
         });
     });
     describe("updateLeagueName", () => {
@@ -329,7 +331,7 @@ describe("PoeTradeFetch", () => {
                     startAt: "2022-01-01T00:00:00Z",
                     endAt: "2222-01-01T00:00:00Z",
                     description: "description1",
-                    category: {id: "LeagueId1", current: true},
+                    category: { id: "LeagueId1", current: true },
                     registerAt: null,
                     delveEvent: true,
                     rules: [
@@ -348,7 +350,7 @@ describe("PoeTradeFetch", () => {
                     startAt: "2022-01-01T00:00:00Z",
                     endAt: null,
                     description: "description2",
-                    category: {id: "LeagueId2"},
+                    category: { id: "LeagueId2" },
                     registerAt: null,
                     delveEvent: false,
                     rules: [
@@ -371,17 +373,17 @@ describe("PoeTradeFetch", () => {
     describe("getTradeDataItems", () => {
         it("should return trade data items", async () => {
             const tradeDataItems = ["Item1", "Item2"];
-            mockHttpRequest.get.mockResolvedValue({result: tradeDataItems});
+            mockHttpRequest.get.mockResolvedValue({ result: tradeDataItems });
 
             const result = await poeTradeFetch.getTradeDataItems();
-            expect(result).toEqual({result: tradeDataItems});
+            expect(result).toEqual({ result: tradeDataItems });
         });
     });
 
     describe("firsRequest", () => {
         it("should make a POST request to the correct path", async () => {
             const requestQuery: RequestBodyType = {
-                query: {status: {option: "online"}},
+                query: { status: { option: "online" } },
             };
             const response: PoeFirstResponseType = {
                 id: "query-id",
@@ -404,7 +406,7 @@ describe("PoeTradeFetch", () => {
         it("should make a GET request to the correct path with pc realm", async () => {
             const arrayIds = ["id1", "id2", "id3"];
             const queryId = "query-id";
-            const response: PoeSecondResponseType = {result: []};
+            const response: PoeSecondResponseType = { result: [] };
             mockHttpRequest.get.mockResolvedValue(response);
 
             const result = await poeTradeFetch.secondRequest(arrayIds, queryId);

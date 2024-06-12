@@ -18,7 +18,7 @@ fixTypeModule.js
 tsconfig.cjs.json
 tsconfig.esm.json
 tsconfig.types.json
-
+biome.json
 
 
 

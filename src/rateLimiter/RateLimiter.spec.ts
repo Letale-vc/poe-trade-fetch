@@ -1,5 +1,5 @@
-import {RateLimiter} from "./RateLimiter";
-import {RateStateLimitType} from "../Types/types";
+import type { RateStateLimitType } from "../Types/types";
+import { RateLimiter } from "./RateLimiter";
 
 describe("RateLimiter", () => {
     let rateLimiter: RateLimiter;
@@ -29,7 +29,7 @@ describe("RateLimiter", () => {
     describe("canMakeRequest", () => {
         it("should return true when getWaitTime returns 0", () => {
             rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
-            const result = rateLimiter.canMakeRequest(rateLimitKey);
+            const result = rateLimiter.isCanMakeRequest(rateLimitKey);
             expect(result).toEqual(true);
         });
 
@@ -38,7 +38,7 @@ describe("RateLimiter", () => {
             rateLimitInfo.accountLimitState = [[3, 5]];
             rateLimitInfo.ipLimitState = [[3, 7]];
             rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
-            const result = rateLimiter.canMakeRequest(rateLimitKey);
+            const result = rateLimiter.isCanMakeRequest(rateLimitKey);
             expect(result).toEqual(false);
         });
     });

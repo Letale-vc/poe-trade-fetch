@@ -1,6 +1,6 @@
 // Для CommonJS стилів
-import {writeFileSync} from "fs";
-import {join} from "path";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const cjsPackage = {
     type: "commonjs",
