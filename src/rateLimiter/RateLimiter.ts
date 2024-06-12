@@ -1,4 +1,4 @@
-import {RateStateLimitType} from "../Types/types";
+import { RateStateLimitType } from "../Types/types";
 
 export class RateLimiter {
     requestStatesRateLimitsMap = new Map<string, RateStateLimitType>();
@@ -7,7 +7,7 @@ export class RateLimiter {
         this.requestStatesRateLimitsMap.set(key, rateLimits);
     }
 
-    canMakeRequest(rateLimitKey: string): boolean {
+    isCanMakeRequest(rateLimitKey: string): boolean {
         return this.getWaitTime(rateLimitKey) === 0 ? true : false;
     }
 

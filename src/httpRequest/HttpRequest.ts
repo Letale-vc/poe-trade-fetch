@@ -4,15 +4,15 @@ import axios, {
     AxiosResponse,
     CreateAxiosDefaults,
 } from "axios";
-import {ConfigType, RateLimitKeys, RateStateLimitType} from "../Types/types.js";
+import { ConfigType, RateLimitKeys, RateStateLimitType } from "../Types/types.js";
 import {
     POE_API_BASE_URL,
     POE_API_FIRST_REQUEST,
     POE_API_SECOND_REQUEST,
     RATE_LIMIT_STATE_KEYS,
 } from "../constants.js";
-import {RateLimiter} from "../rateLimiter/RateLimiter.js";
-import {delay} from "../utility/utility.js";
+import { RateLimiter } from "../rateLimiter/RateLimiter.js";
+import { delay } from "../utility/utility.js";
 
 export class HttpRequest {
     axiosInstance: AxiosInstance;
@@ -63,7 +63,7 @@ export class HttpRequest {
                 await delay(waitTime);
             }
 
-            if (!this.rateLimiter.canMakeRequest(limitKey)) {
+            if (!this.rateLimiter.isCanMakeRequest(limitKey)) {
                 throw new Error("Rate limit exceeded");
             }
             return config;
