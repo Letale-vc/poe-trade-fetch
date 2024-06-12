@@ -39,8 +39,8 @@
         "prebuild": "rimraf dist",
         "build": "npm run prebuild && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.types.json && node fixTypeModule.js",
         "lint": "npx @biomejs/biome lint .",
-        "lint-fix": "npx @biomejs/biome lint . --apply",
-        "format": "npx @biomejs/biome format . --apply",
+        "lint-fix": "npx @biomejs/biome lint . --write",
+        "format": "npx @biomejs/biome format . --write",
         "test": "jest ./src",
         "pub": "npm run build && npm publish",
         "semantic-release": "semantic-release"
