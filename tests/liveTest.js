@@ -1,5 +1,3 @@
-import { HttpProxyAgent } from "http-proxy-agent";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import {
     POE_API_FIRST_REQUEST,
     POE_API_SECOND_REQUEST,
@@ -7,28 +5,22 @@ import {
 } from "../dist/esm/index.js";
 
 (async () => {
-    const api = new PoeTradeFetch();
-    await api.update({ userAgent: "myPoeApp" });
-    const httpAgent = new HttpProxyAgent("");
-    const httpsAgent = new HttpsProxyAgent("");
+    const api = new PoeTradeFetch({ userAgent: "myPoeApp" });
+    await api.init();
+    // const httpAgent = new HttpProxyAgent("");
+    // const httpsAgent = new HttpsProxyAgent("");
 
-    const axiosConfig = {
-        httpAgent,
-        httpsAgent,
-    };
+    const axiosConfig = {};
     for (let i = 0; i <= 5; i++) {
         console.log("CYCLE: ", i);
-        console.log(api.httpRequest.rateLimiter.requestStatesRateLimitsMap);
+        console.log(api.httpRequest.rateLimiter.rateLimitsState);
         const firstDelay = api.httpRequest.rateLimiter.getWaitTime(
             POE_API_FIRST_REQUEST,
         );
         console.log("First delay: ", firstDelay);
-        const { result, id } = await api.firsRequest(
-            { query: {} },
-            axiosConfig,
-        );
+        const { result, id } = await api.firsRequest({ query: {} });
         console.log(
-            api.httpRequest.rateLimiter.requestStatesRateLimitsMap.get(
+            api.httpRequest.rateLimiter.rateLimitsState.get(
                 POE_API_FIRST_REQUEST,
             ),
         );
