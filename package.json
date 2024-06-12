@@ -21,12 +21,17 @@
     },
     "typesVersions": {
         ">=4.2": {
-            "*": [ "./dist/types/*" ]
+            "*": [
+                "./dist/types/*"
+            ]
         }
     },
     "type": "module",
     "release": {
-        "branches": [ "master", "dev" ],
+        "branches": [
+            "master",
+            "dev"
+        ],
         "plugins": [
             "@semantic-release/commit-analyzer",
             "@semantic-release/release-notes-generator",
@@ -49,7 +54,11 @@
         "type": "git",
         "url": "https://github.com/Letale-vc/poe-trade-fetch.git"
     },
-    "keywords": [ "Path of Exile", "poe", "fetch" ],
+    "keywords": [
+        "Path of Exile",
+        "poe",
+        "fetch"
+    ],
     "author": "Helpless",
     "licenses": [
         {
