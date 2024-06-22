@@ -224,9 +224,9 @@
 import { PoeTradeFetch } from "./PoeTradeFetch";
 import type { LeagueResponseType } from "./Types/PoeLeagueResponseType.js";
 import type {
-    PoeFirstResponseType,
-    PoeSecondResponseType,
-} from "./Types/PoeResponseType.js";
+    PoeFirstResponse,
+    PoeSecondResponse,
+} from "./Types/PoeResponse.js";
 import type { RequestBodyType } from "./Types/TradeRequestBodyType.js";
 import type { ConfigInputType } from "./Types/types.js";
 import {
@@ -385,10 +385,10 @@ describe("PoeTradeFetch", () => {
             const requestQuery: RequestBodyType = {
                 query: { status: { option: "online" } },
             };
-            const response: PoeFirstResponseType = {
+            const response: PoeFirstResponse = {
                 id: "query-id",
                 result: ["id1", "id2"],
-            } as PoeFirstResponseType;
+            } as PoeFirstResponse;
             mockHttpRequest.post.mockResolvedValue(response);
 
             const result = await poeTradeFetch.firsRequest(requestQuery);
@@ -406,7 +406,7 @@ describe("PoeTradeFetch", () => {
         it("should make a GET request to the correct path with pc realm", async () => {
             const arrayIds = ["id1", "id2", "id3"];
             const queryId = "query-id";
-            const response: PoeSecondResponseType = { result: [] };
+            const response: PoeSecondResponse = { result: [] };
             mockHttpRequest.get.mockResolvedValue(response);
 
             const result = await poeTradeFetch.secondRequest(arrayIds, queryId);
@@ -424,9 +424,9 @@ describe("PoeTradeFetch", () => {
         it("should make a GET request to the correct path with non-pc realm", async () => {
             const arrayIds = ["id1", "id2", "id3"];
             const queryId = "query-id";
-            const response: PoeSecondResponseType = {
+            const response: PoeSecondResponse = {
                 result: [],
-            } as PoeSecondResponseType;
+            } as PoeSecondResponse;
             mockHttpRequest.get.mockResolvedValue(response);
             poeTradeFetch.config.realm = REALMS.xbox; // set non-pc realm
 

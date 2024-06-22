@@ -45,8 +45,6 @@ export const DEFAULT_CONFIG: ConfigType = {
     useRateLimitDelay: true,
 } as const;
 
-// export const RATE_LIMIT_STATE_KEYS = [POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, 'other'];
-
 export const RATE_LIMIT_STATE_KEYS = {
     POE_API_FIRST_REQUEST,
     POE_API_SECOND_REQUEST,

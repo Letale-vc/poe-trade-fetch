@@ -1,285 +1,250 @@
-import { z } from "zod";
+export type SortType = Record<string, string>;
 
-export const sortTypeSchema = z.record(z.string());
+export type StatusType = {
+    option?: string;
+};
 
-const statusTypeSchema = z.object({
-    option: z.string().optional(),
-});
+export type NameType = {
+    discriminator?: string;
+    option?: string;
+};
 
-const nameTypeSchema = z.object({
-    discriminator: z.string().optional(),
-    option: z.string().optional(),
-});
+export type TypeType = {
+    discriminator?: string;
+    option?: string;
+};
 
-const typeTypeSchema = z.object({
-    discriminator: z.string().optional(),
-    option: z.string().optional(),
-});
+export type FilterType = {
+    id?: string;
+    disabled?: boolean;
+    value?: {
+        min?: number | null;
+        weight?: number;
+        option?: number | null;
+    };
+};
 
-const filterTypeSchema = z.object({
-    id: z.string().optional(),
-    disabled: z.boolean().optional(),
-    value: z
-        .object({
-            min: z.number().optional().nullable(),
-            weight: z.number().optional(),
-            option: z.number().optional().nullable(),
-        })
-        .optional(),
-});
+export type RangeFilterType = {
+    min?: number | null;
+    max?: number | null;
+};
 
-const rangeFilterTypeSchema = z.object({
-    min: z.number().optional().nullable(),
-    max: z.number().optional().nullable(),
-});
+export type OptionIndexedFilterType = {
+    option?:
+        | "1hour"
+        | "3hours"
+        | "12hours"
+        | "1day"
+        | "3days"
+        | "1week"
+        | "2weeks"
+        | "1month"
+        | "2months"
+        | null;
+};
 
-const optionIndexedFilterTypeSchema = z.object({
-    option: z
-        .enum([
-            "1hour",
-            "3hours",
-            "12hours",
-            "1day",
-            "3days",
-            "1week",
-            "2weeks",
-            "1month",
-            "2months",
-        ])
-        .optional()
-        .nullable(),
-});
-const optionFilterTypeSchema = z.object({
-    option: z.string().optional().nullable(),
-});
+export type OptionFilterType = {
+    option?: string | null;
+};
 
-const inputFilterTypeSchema = z.object({
-    input: z.string().optional().nullable(),
-});
+export type InputFilterType = {
+    input?: string | null;
+};
 
-const priceFilterTypeSchema = z.object({
-    option: z.string().optional().nullable(),
-    min: z.number().optional().nullable(),
-    max: z.number().optional().nullable(),
-});
+export type PriceFilterType = {
+    option?: string | null;
+    min?: number | null;
+    max?: number | null;
+};
 
-const socketsFilterTypeSchema = z.object({
-    r: z.number().optional().nullable(),
-    g: z.number().optional().nullable(),
-    min: z.number().optional().nullable(),
-    max: z.number().optional().nullable(),
-    w: z.number().optional().nullable(),
-    b: z.number().optional().nullable(),
-});
+export type SocketsFilterType = {
+    r?: number | null;
+    g?: number | null;
+    min?: number | null;
+    max?: number | null;
+    w?: number | null;
+    b?: number | null;
+};
 
-const linksFilterTypeSchema = z.object({
-    g: z.number().optional().nullable(),
-    r: z.number().optional().nullable(),
-    b: z.number().optional().nullable(),
-    w: z.number().optional().nullable(),
-    min: z.number().optional().nullable(),
-    max: z.number().optional().nullable(),
-});
+export type LinksFilterType = {
+    g?: number | null;
+    r?: number | null;
+    b?: number | null;
+    w?: number | null;
+    min?: number | null;
+    max?: number | null;
+};
 
-const statTypeSchema = z.object({
-    type: z.string().optional(),
-    filters: z.array(filterTypeSchema).optional(),
-    disabled: z.boolean().optional(),
-    value: z
-        .object({
-            min: z.number().optional().nullable(),
-            weight: z.number().optional(),
-            option: z.number().optional().nullable(),
-        })
-        .optional(),
-});
+export type StatType = {
+    type?: string | null;
+    filters?: FilterType[] | null;
+    disabled?: boolean;
+    value?: {
+        min?: number | null;
+        weight?: number;
+        option?: number | null;
+    };
+};
 
-const miscFiltersTypeSchema = z.object({
-    filters: z
-        .object({
-            quality: rangeFilterTypeSchema.optional(),
-            gem_level: rangeFilterTypeSchema.optional(),
-            ilvl: rangeFilterTypeSchema.optional(),
-            gem_level_progress: rangeFilterTypeSchema.optional(),
-            gem_alternate_quality: optionFilterTypeSchema.optional(),
-            fractured_item: optionFilterTypeSchema.optional(),
-            tangled_item: optionFilterTypeSchema.optional(),
-            synthesised_item: optionFilterTypeSchema.optional(),
-            crucible_item: optionFilterTypeSchema.optional(),
-            corrupted: optionFilterTypeSchema.optional(),
-            split: optionFilterTypeSchema.optional(),
-            veiled: optionFilterTypeSchema.optional(),
-            crafted: optionFilterTypeSchema.optional(),
-            foreseeing: optionFilterTypeSchema.optional(),
-            searing_item: optionFilterTypeSchema.optional(),
-            mirrored: optionFilterTypeSchema.optional(),
-            identified: optionFilterTypeSchema.optional(),
-            talisman_tier: rangeFilterTypeSchema.optional(),
-            stack_size: rangeFilterTypeSchema.optional(),
-            stored_experience: rangeFilterTypeSchema.optional(),
-            alternate_art: optionFilterTypeSchema.optional(),
-            foil_variation: optionFilterTypeSchema.optional(),
-        })
-        .optional(),
-    disabled: z.boolean().optional(),
-});
+export type MiscFiltersType = {
+    filters?: {
+        quality?: RangeFilterType;
+        gem_level?: RangeFilterType;
+        ilvl?: RangeFilterType;
+        gem_level_progress?: RangeFilterType;
+        gem_alternate_quality?: OptionFilterType;
+        fractured_item?: OptionFilterType;
+        tangled_item?: OptionFilterType;
+        synthesised_item?: OptionFilterType;
+        crucible_item?: OptionFilterType;
+        corrupted?: OptionFilterType;
+        split?: OptionFilterType;
+        veiled?: OptionFilterType;
+        crafted?: OptionFilterType;
+        foreseeing?: OptionFilterType;
+        searing_item?: OptionFilterType;
+        mirrored?: OptionFilterType;
+        identified?: OptionFilterType;
+        talisman_tier?: RangeFilterType;
+        stack_size?: RangeFilterType;
+        stored_experience?: RangeFilterType;
+        alternate_art?: OptionFilterType;
+        foil_variation?: OptionFilterType;
+    } | null;
+    disabled?: boolean;
+};
 
-const typeFiltersTypeSchema = z.object({
-    filters: z
-        .object({
-            rarity: optionFilterTypeSchema.optional(),
-            category: optionFilterTypeSchema.optional(),
-        })
-        .optional(),
-    disabled: z.boolean().optional(),
-});
+export type TypeFiltersType = {
+    filters?: {
+        rarity?: OptionFilterType;
+        category?: OptionFilterType;
+    } | null;
+    disabled?: boolean;
+};
 
-const tradeFiltersTypeSchema = z.object({
-    filters: z
-        .object({
-            account: inputFilterTypeSchema.optional(),
-            collapse: optionFilterTypeSchema.optional(),
-            indexed: optionIndexedFilterTypeSchema.optional(),
-            sale_type: optionFilterTypeSchema.optional(),
-            price: priceFilterTypeSchema.optional(),
-        })
-        .optional(),
-    disabled: z.boolean().optional(),
-});
+export type TradeFiltersType = {
+    filters?: {
+        account?: InputFilterType;
+        collapse?: OptionFilterType;
+        indexed?: OptionIndexedFilterType;
+        sale_type?: OptionFilterType;
+        price?: PriceFilterType;
+    } | null;
+    disabled?: boolean;
+};
 
-const sanctumFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            sanctum_resolve: rangeFilterTypeSchema.optional(),
-            sanctum_inspiration: rangeFilterTypeSchema.optional(),
-            sanctum_max_resolve: rangeFilterTypeSchema.optional(),
-            sanctum_gold: rangeFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type SanctumFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        sanctum_resolve?: RangeFilterType;
+        sanctum_inspiration?: RangeFilterType;
+        sanctum_max_resolve?: RangeFilterType;
+        sanctum_gold?: RangeFilterType;
+    } | null;
+};
 
-const heistFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            heist_wings: rangeFilterTypeSchema.optional(),
-            heist_reward_rooms: rangeFilterTypeSchema.optional(),
-            heist_escape_routes: rangeFilterTypeSchema.optional(),
-            heist_max_wings: rangeFilterTypeSchema.optional(),
-            heist_max_reward_rooms: rangeFilterTypeSchema.optional(),
-            heist_max_escape_routes: rangeFilterTypeSchema.optional(),
-            heist_objective_value: optionFilterTypeSchema.optional(),
-            heist_lockpicking: rangeFilterTypeSchema.optional(),
-            heist_counter_thaumaturgy: rangeFilterTypeSchema.optional(),
-            heist_engineering: rangeFilterTypeSchema.optional(),
-            heist_agility: rangeFilterTypeSchema.optional(),
-            heist_demolition: rangeFilterTypeSchema.optional(),
-            heist_deception: rangeFilterTypeSchema.optional(),
-            heist_brute_force: rangeFilterTypeSchema.optional(),
-            heist_trap_disarmament: rangeFilterTypeSchema.optional(),
-            heist_perception: rangeFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type HeistFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        heist_wings?: RangeFilterType;
+        heist_reward_rooms?: RangeFilterType;
+        heist_escape_routes?: RangeFilterType;
+        heist_max_wings?: RangeFilterType;
+        heist_max_reward_rooms?: RangeFilterType;
+        heist_max_escape_routes?: RangeFilterType;
+        heist_objective_value?: OptionFilterType;
+        heist_lockpicking?: RangeFilterType;
+        heist_counter_thaumaturgy?: RangeFilterType;
+        heist_engineering?: RangeFilterType;
+        heist_agility?: RangeFilterType;
+        heist_demolition?: RangeFilterType;
+        heist_deception?: RangeFilterType;
+        heist_brute_force?: RangeFilterType;
+        heist_trap_disarmament?: RangeFilterType;
+        heist_perception?: RangeFilterType;
+    } | null;
+};
 
-const mapFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            map_tier: rangeFilterTypeSchema.optional(),
-            map_iiq: rangeFilterTypeSchema.optional(),
-            area_level: rangeFilterTypeSchema.optional(),
-            map_iir: rangeFilterTypeSchema.optional(),
-            map_packsize: rangeFilterTypeSchema.optional(),
-            map_blighted: optionFilterTypeSchema.optional(),
-            map_series: optionFilterTypeSchema.optional(),
-            map_uberblighted: optionFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type MapFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        map_tier?: RangeFilterType;
+        map_iiq?: RangeFilterType;
+        area_level?: RangeFilterType;
+        map_iir?: RangeFilterType;
+        map_packsize?: RangeFilterType;
+        map_blighted?: OptionFilterType;
+        map_series?: OptionFilterType;
+        map_uberblighted?: OptionFilterType;
+    } | null;
+};
 
-const reqFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            lvl: rangeFilterTypeSchema.optional(),
-            dex: rangeFilterTypeSchema.optional(),
-            class: optionFilterTypeSchema.optional(),
-            int: rangeFilterTypeSchema.optional(),
-            str: rangeFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type ReqFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        lvl?: RangeFilterType;
+        dex?: RangeFilterType;
+        class?: OptionFilterType;
+        int?: RangeFilterType;
+        str?: RangeFilterType;
+    } | null;
+};
 
-const socketFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            sockets: socketsFilterTypeSchema.optional(),
-            links: linksFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type SocketFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        sockets?: SocketsFilterType;
+        links?: LinksFilterType;
+    } | null;
+};
 
-const armourFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            ar: rangeFilterTypeSchema.optional(),
-            es: rangeFilterTypeSchema.optional(),
-            block: rangeFilterTypeSchema.optional(),
-            ward: rangeFilterTypeSchema.optional(),
-            base_defence_percentile: rangeFilterTypeSchema.optional(),
-            ev: rangeFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type ArmourFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        ar?: RangeFilterType;
+        es?: RangeFilterType;
+        block?: RangeFilterType;
+        ward?: RangeFilterType;
+        base_defence_percentile?: RangeFilterType;
+        ev?: RangeFilterType;
+    } | null;
+};
 
-const weaponFiltersTypeSchema = z.object({
-    disabled: z.boolean().optional(),
-    filters: z
-        .object({
-            damage: rangeFilterTypeSchema.optional(),
-            crit: rangeFilterTypeSchema.optional(),
-            pdps: rangeFilterTypeSchema.optional(),
-            aps: rangeFilterTypeSchema.optional(),
-            dps: rangeFilterTypeSchema.optional(),
-            edps: rangeFilterTypeSchema.optional(),
-        })
-        .optional(),
-});
+export type WeaponFiltersType = {
+    disabled?: boolean;
+    filters?: {
+        damage?: RangeFilterType;
+        crit?: RangeFilterType;
+        pdps?: RangeFilterType;
+        aps?: RangeFilterType;
+        dps?: RangeFilterType;
+        edps?: RangeFilterType;
+    } | null;
+};
 
-const filtersTypeSchema = z.object({
-    misc_filters: miscFiltersTypeSchema.optional(),
-    type_filters: typeFiltersTypeSchema.optional(),
-    trade_filters: tradeFiltersTypeSchema.optional(),
-    sanctum_filters: sanctumFiltersTypeSchema.optional(),
-    heist_filters: heistFiltersTypeSchema.optional(),
-    map_filters: mapFiltersTypeSchema.optional(),
-    req_filters: reqFiltersTypeSchema.optional(),
-    socket_filters: socketFiltersTypeSchema.optional(),
-    armour_filters: armourFiltersTypeSchema.optional(),
-    weapon_filters: weaponFiltersTypeSchema.optional(),
-});
+export type FiltersType = {
+    misc_filters?: MiscFiltersType | null;
+    type_filters?: TypeFiltersType | null;
+    trade_filters?: TradeFiltersType | null;
+    sanctum_filters?: SanctumFiltersType | null;
+    heist_filters?: HeistFiltersType | null;
+    map_filters?: MapFiltersType | null;
+    req_filters?: ReqFiltersType | null;
+    socket_filters?: SocketFiltersType | null;
+    armour_filters?: ArmourFiltersType | null;
+    weapon_filters?: WeaponFiltersType | null;
+};
 
-export const queryTypeSchema = z.object({
-    status: z.union([statusTypeSchema, z.string()]).optional(),
-    name: z.union([z.string(), nameTypeSchema]).optional(),
-    type: z.union([z.string(), typeTypeSchema]).optional(),
-    term: z.string().optional(),
-    stats: z.array(statTypeSchema).optional(),
-    filters: filtersTypeSchema.optional(),
-});
+export type QueryType = {
+    status?: StatusType | string | null;
+    name?: string | NameType | null;
+    type?: string | TypeType | null;
+    term?: string | null;
+    stats?: StatType[] | null;
+    filters?: FiltersType | null;
+};
 
-export const requestBodyTypeSchema = z.object({
-    query: queryTypeSchema,
-    sort: sortTypeSchema.optional(),
-});
-
-// inferred types:
-export type SortType = z.infer<typeof sortTypeSchema>;
-
-export type QueryType = z.infer<typeof queryTypeSchema>;
-
-export type RequestBodyType = z.infer<typeof requestBodyTypeSchema>;
+export type RequestBodyType = {
+    query: QueryType;
+    sort?: SortType | null;
+};

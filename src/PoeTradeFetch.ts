@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from "axios";
 import * as cheerio from "cheerio";
-import type { ExchangeResponseType } from "./Types/ExchangeResponseType.js";
+import type { ExchangeResponseType } from "./Types/ExchangeResponse.js";
 import type {
     ExchangeStateType,
     PageStatesType,
@@ -8,10 +8,10 @@ import type {
 } from "./Types/PageStates.js";
 import type { LeagueResponseType } from "./Types/PoeLeagueResponseType.js";
 import type {
-    PoeFirstResponseType,
-    PoeSecondResponseType,
-    PoeTradeDataItemsResponseType,
-} from "./Types/PoeResponseType.js";
+    PoeFirstResponse,
+    PoeSecondResponse,
+    TradeDataItems,
+} from "./Types/PoeResponse.js";
 import type { TradeExchangeRequestType } from "./Types/TradeExchangeRequestBodyType.js";
 import type { RequestBodyType } from "./Types/TradeRequestBodyType.js";
 import type {
@@ -91,8 +91,8 @@ export class PoeTradeFetch {
         return leagueList.find(el => el.category.current === true)?.category.id;
     }
 
-    async getTradeDataItems(): Promise<PoeTradeDataItemsResponseType> {
-        return await this.httpRequest.get<PoeTradeDataItemsResponseType>(
+    async getTradeDataItems(): Promise<TradeDataItems> {
+        return await this.httpRequest.get<TradeDataItems>(
             POE_API_TRADE_DATA_ITEMS_URL,
         );
     }
@@ -100,14 +100,14 @@ export class PoeTradeFetch {
     async firsRequest(
         requestQuery: RequestBodyType,
         config?: AxiosRequestConfig,
-    ): Promise<PoeFirstResponseType> {
+    ): Promise<PoeFirstResponse> {
         let path = POE_API_FIRST_REQUEST.replace(":league", this.leagueName);
         path =
             this.config.realm === REALMS.pc
                 ? path.replace("/:realm", "")
                 : path.replace(":realm", this.config.realm);
 
-        return await this.httpRequest.post<PoeFirstResponseType>(
+        return await this.httpRequest.post<PoeFirstResponse>(
             path,
             requestQuery,
             config,
@@ -118,7 +118,7 @@ export class PoeTradeFetch {
         arrayIds: string[],
         queryId: string,
         config?: AxiosRequestConfig,
-    ): Promise<PoeSecondResponseType> {
+    ): Promise<PoeSecondResponse> {
         let basePath = POE_API_SECOND_REQUEST;
         basePath += arrayIds.join(",");
         basePath += `?query=${queryId}`;
@@ -127,10 +127,7 @@ export class PoeTradeFetch {
             basePath += `&realm=${this.config.realm}`;
         }
 
-        return await this.httpRequest.get<PoeSecondResponseType>(
-            basePath,
-            config,
-        );
+        return await this.httpRequest.get<PoeSecondResponse>(basePath, config);
     }
 
     async exchangeRequest(
@@ -189,7 +186,7 @@ export class PoeTradeFetch {
     async poeTradeSearchUrl(
         url: URL,
         poesessid?: string,
-    ): Promise<PoeSecondResponseType> {
+    ): Promise<PoeSecondResponse> {
         const queryId = this.getQueryIdInTradeUrl(url);
         const page = await this.getTradePage(queryId, poesessid);
         const requestBody = this.createSearchRequestBody(page);
