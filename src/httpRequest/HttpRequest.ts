@@ -52,8 +52,9 @@ export class HttpRequest {
     }
 
     setPoesessidAsDefault(POESESSID: string | null) {
-        this.axiosInstance.defaults.headers.common.Cookie =
-            POESESSID === null ? "" : `POESESSID=${POESESSID}`;
+        this.axiosInstance.defaults.headers.common.Cookie = !POESESSID
+            ? ""
+            : `POESESSID=${POESESSID}`;
     }
 
     private setupRequestInterceptors() {
@@ -116,7 +117,7 @@ export class HttpRequest {
         }
         return key;
     }
-    private setupResponseInterceptors() {
+    private setupResponseInterceptors(): void {
         this.axiosInstance.interceptors.response.use(
             res => {
                 let limitKey = this.getRateLimitKey(res.config.url);
@@ -134,12 +135,16 @@ export class HttpRequest {
         );
     }
 
-    async get<T>(url: string, config?: AxiosRequestConfig) {
+    async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
         const response = await this.axiosInstance.get<T>(url, config);
         return response.data;
     }
 
-    async post<T>(url: string, data: object = {}, config?: AxiosRequestConfig) {
+    async post<T>(
+        url: string,
+        data: object = {},
+        config?: AxiosRequestConfig,
+    ): Promise<T> {
         const response = await this.axiosInstance.post<T>(url, data, config);
         return response.data;
     }
