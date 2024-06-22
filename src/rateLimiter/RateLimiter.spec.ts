@@ -29,7 +29,7 @@ describe("RateLimiter", () => {
     describe("canMakeRequest", () => {
         it("should return true when getWaitTime returns 0", () => {
             rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
-            const result = rateLimiter.isCanMakeRequest(rateLimitKey);
+            const result = rateLimiter.canMakeRequest(rateLimitKey);
             expect(result).toEqual(true);
         });
 
@@ -38,7 +38,7 @@ describe("RateLimiter", () => {
             rateLimitInfo.accountLimitState = [[3, 5]];
             rateLimitInfo.ipLimitState = [[3, 7]];
             rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
-            const result = rateLimiter.isCanMakeRequest(rateLimitKey);
+            const result = rateLimiter.canMakeRequest(rateLimitKey);
             expect(result).toEqual(false);
         });
     });

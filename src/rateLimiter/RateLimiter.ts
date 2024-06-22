@@ -1,30 +1,36 @@
 import type { RateStateLimitType } from "../Types/types";
 
 export class RateLimiter {
-    rateLimitsState = new Map<string, RateStateLimitType>();
+    state = new Map<string, RateStateLimitType>();
 
-    setRateLimitInfo(key: string, rateLimits: RateStateLimitType) {
-        this.rateLimitsState.set(key, rateLimits);
+    setRateLimitInfo(key: string, rateLimits: RateStateLimitType): void {
+        this.state.set(key, rateLimits);
     }
 
-    isCanMakeRequest(rateLimitKey: string): boolean {
+    canMakeRequest(rateLimitKey: string): boolean {
         return this.getWaitTime(rateLimitKey) === 0;
     }
 
-    calculateWaitTime(limitState: Array<number[]>, limit: Array<number[]>) {
+    calculateWaitTime(
+        limitState: Array<number[]>,
+        limit: Array<number[]>,
+    ): number {
         return limitState.reduce((acc, [current, period], index) => {
             let time = acc;
             const [maxHits] = limit[index];
             const checkViolated = current >= maxHits;
+
             if (checkViolated && acc < period) {
                 time = period;
             }
+
             return time;
         }, 0);
     }
 
     getWaitTime(rateLimitKey: string): number {
-        const rateLimitInfo = this.rateLimitsState.get(rateLimitKey);
+        const rateLimitInfo = this.state.get(rateLimitKey);
+
         if (rateLimitInfo === undefined) {
             return 0;
         }
@@ -40,7 +46,6 @@ export class RateLimiter {
             rateLimitInfo.ipLimit,
         );
         let waitTime = Math.max(accWaitTime, ipWaitTime);
-
         waitTime = waitTime - differenceTimeInSec;
 
         return Math.max(0, waitTime);

@@ -69,7 +69,7 @@ export class HttpRequest {
                 await delay(waitTime);
             }
 
-            if (!this.rateLimiter.isCanMakeRequest(limitKey)) {
+            if (!this.rateLimiter.canMakeRequest(limitKey)) {
                 throw new Error("Rate limit exceeded");
             }
             return config;

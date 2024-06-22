@@ -114,7 +114,7 @@ describe("HttpRequest", () => {
             await httpRequest.post("api/trade/search/League");
 
             expect(
-                httpRequest.rateLimiter.rateLimitsState.get(
+                httpRequest.rateLimiter.state.get(
                     RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
                 ),
             ).toEqual(rateLimits);
@@ -155,7 +155,7 @@ describe("HttpRequest", () => {
             httpRequest.rateLimiter.getWaitTime = jest
                 .fn()
                 .mockReturnValue(1000);
-            httpRequest.rateLimiter.isCanMakeRequest = jest
+            httpRequest.rateLimiter.canMakeRequest = jest
                 .fn()
                 .mockReturnValue(true);
             mockAxios.onGet("/test").reply(200, { data: "test" });
@@ -175,7 +175,7 @@ describe("HttpRequest", () => {
         });
 
         it("should throw an error if the rate limit is exceeded", async () => {
-            httpRequest.rateLimiter.isCanMakeRequest = jest
+            httpRequest.rateLimiter.canMakeRequest = jest
                 .fn()
                 .mockReturnValue(false);
 
@@ -186,7 +186,7 @@ describe("HttpRequest", () => {
         });
 
         it("should not throw an error if the rate limit is not exceeded", async () => {
-            httpRequest.rateLimiter.isCanMakeRequest = jest
+            httpRequest.rateLimiter.canMakeRequest = jest
                 .fn()
                 .mockReturnValue(true);
 
