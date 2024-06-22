@@ -76,8 +76,7 @@
     "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
     "dependencies": {
         "axios": "^1.7.2",
-        "cheerio": "^1.0.0-rc.12",
-        "zod": "^3.23.8"
+        "cheerio": "^1.0.0-rc.12"
     },
     "devDependencies": {
         "@biomejs/biome": "^1.8.1",
