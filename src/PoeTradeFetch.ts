@@ -31,14 +31,16 @@ import {
     REALMS,
 } from "./constants.js";
 import { HttpRequest } from "./httpRequest/HttpRequest.js";
+import { PoeTradeFetchError } from "./poeTradeFetchError.js";
 
 export class PoeTradeFetch {
     static instance: PoeTradeFetch;
     leagueName: string;
-    config: ConfigType = DEFAULT_CONFIG;
+    config: ConfigType;
     httpRequest: HttpRequest;
 
     constructor(config: ConfigInputType) {
+        this.config = DEFAULT_CONFIG;
         this.config = { ...this.config, ...config };
         this.leagueName = LEAGUES_NAMES.Standard;
         this.httpRequest = new HttpRequest(this.config);
@@ -182,7 +184,7 @@ export class PoeTradeFetch {
         }
         return transformedData;
     }
-    // Метод для пошуку по URL торгівельної платформи PoE
+
     async poeTradeSearchUrl(
         url: URL,
         poesessid?: string,
@@ -198,7 +200,6 @@ export class PoeTradeFetch {
         return await this.secondRequest(identifiers, queryId);
     }
 
-    // Метод для отримання сторінки торгівлі за її ідентифікатором
     async getTradePage(queryId: string, poesessid?: string): Promise<string> {
         const baseUrl = POE_SEARCH_PAGE_URL;
         const addLeaguePath = baseUrl.replace(":league", this.leagueName);
@@ -209,14 +210,12 @@ export class PoeTradeFetch {
         return await this.httpRequest.get<string>(addIdPath, config);
     }
 
-    // Розділення URL на частини та отримання ідентифікатора запиту
     getQueryIdInTradeUrl(url: URL): string {
         const pathParts = url.pathname.split("/");
         const queryId = pathParts[pathParts.length - 1];
         return queryId;
     }
 
-    // Отримання об'єкту тіла запиту для першого запиту
     createSearchRequestBody(page: string): RequestBodyType {
         const { state } = this.getPoeTradePageState(page);
         return {
@@ -241,18 +240,23 @@ export class PoeTradeFetch {
                     if (this.isValidPageStates(parsedPageStates)) {
                         state = parsedPageStates as S;
                     } else {
-                        throw new Error("Unknown page state structure");
+                        throw new PoeTradeFetchError(
+                            new Error("Unknown page state structure"),
+                        );
                     }
                 } catch (e) {
-                    throw new Error(`Failed to parse JSON: ${e}`);
+                    throw new PoeTradeFetchError(
+                        new Error(`Failed to parse JSON: ${e}`),
+                    );
                 }
             }
         });
         if (state === null) {
-            throw new Error("Error page parse");
+            throw new PoeTradeFetchError(new Error("Error page parse"));
         }
         return state;
     }
+
     private isValidPageStates(parsedPageStates: object): boolean {
         return (
             "state" in parsedPageStates &&
