@@ -52,7 +52,7 @@ export class PoeTradeFetch {
 
     async updateConfig(config: ConfigUpdateType = {}) {
         this.config = { ...this.config, ...config };
-        this.httpRequest.updateConfig(this.config);
+        this.httpRequest.updateConfiguration();
         await this.updateLeagueName();
     }
 

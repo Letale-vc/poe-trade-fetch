@@ -28,14 +28,16 @@ export class HttpRequest {
     constructor(appSettings: ConfigType) {
         this._appSetting = appSettings;
         this.axiosInstance = this.createAxiosInstance();
-        this.initializeRequestInterceptors();
+        this.setupRequestInterceptors();
         this.setupResponseInterceptors();
     }
 
-    updateConfig(appSettings: ConfigType) {
+    updateConfiguration() {
         this.axiosInstance.defaults.headers["User-Agent"] =
-            appSettings.userAgent;
+            this._appSetting.userAgent;
         this.setPoesessidAsDefault();
+        this.setupResponseInterceptors();
+        this.setupRequestInterceptors();
     }
 
     private createAxiosInstance(): AxiosInstance {
@@ -58,7 +60,7 @@ export class HttpRequest {
             : `POESESSID=${this._appSetting.POESESSID}`;
     }
 
-    private initializeRequestInterceptors() {
+    private setupRequestInterceptors() {
         this.axiosInstance.interceptors.request.use(async config => {
             if (this._appSetting.useRateLimitDelay) {
                 let limitKey = this.getRateLimitKey(config.url);

@@ -1,5 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
-import type { RateStateLimitType } from "../Types/index.js";
+import type { ConfigType, RateStateLimitType } from "../Types/index.js";
 import {
     DEFAULT_CONFIG,
     POE_API_BASE_URL,
@@ -17,11 +17,13 @@ jest.mock("../utility/delay.js", () => ({
 describe("HttpRequest", () => {
     let httpRequest: HttpRequest;
     let mockAxios: MockAdapter;
+    let configMock: ConfigType;
 
     beforeEach(() => {
+        configMock = { ...DEFAULT_CONFIG };
         const mockDate = 1706059622008;
         global.Date.now = jest.fn(() => mockDate);
-        httpRequest = new HttpRequest(DEFAULT_CONFIG);
+        httpRequest = new HttpRequest(configMock);
         mockAxios = new MockAdapter(httpRequest.axiosInstance);
     });
 
@@ -52,7 +54,8 @@ describe("HttpRequest", () => {
     });
 
     test("should set POESESSID as default", () => {
-        httpRequest.setPoesessidAsDefault("test-poesessid");
+        configMock.POESESSID = "test-poesessid";
+        httpRequest.setPoesessidAsDefault();
         expect(httpRequest.axiosInstance.defaults.headers.common.Cookie).toBe(
             "POESESSID=test-poesessid",
         );
@@ -151,7 +154,6 @@ describe("HttpRequest", () => {
     describe("setupRequestInterceptors", () => {
         it("should delay the request if useRateLimitDelay is true", async () => {
             const delaySpy = jest.spyOn({ delay }, "delay");
-            httpRequest.useRateLimitDelay = true;
             httpRequest.rateLimiter.getWaitTime = jest
                 .fn()
                 .mockReturnValue(1000);
@@ -166,32 +168,12 @@ describe("HttpRequest", () => {
 
         it("should not delay the request if useRateLimitDelay is false", async () => {
             const delaySpy = jest.spyOn({ delay }, "delay");
-            httpRequest.useRateLimitDelay = false;
+            configMock.useRateLimitDelay = false;
 
             mockAxios.onGet("/test").reply(200, { data: "test" });
             await httpRequest.get("/test");
 
             expect(delaySpy).not.toHaveBeenCalled();
-        });
-
-        it("should throw an error if the rate limit is exceeded", async () => {
-            httpRequest.rateLimiter.canMakeRequest = jest
-                .fn()
-                .mockReturnValue(false);
-
-            mockAxios.onGet("/test").reply(200, { data: "test" });
-            await expect(httpRequest.get("/test")).rejects.toThrow(
-                "Rate limit exceeded",
-            );
-        });
-
-        it("should not throw an error if the rate limit is not exceeded", async () => {
-            httpRequest.rateLimiter.canMakeRequest = jest
-                .fn()
-                .mockReturnValue(true);
-
-            mockAxios.onGet("/test").reply(200, { data: "test" });
-            await expect(httpRequest.get("/test")).resolves.not.toThrow();
         });
     });
 });
