@@ -11,21 +11,24 @@ export class RateLimiter {
         return this.getWaitTime(rateLimitKey) === 0;
     }
 
-    calculateWaitTime(
+    private calculateWaitTime(
         limitState: Array<number[]>,
         limit: Array<number[]>,
     ): number {
-        return limitState.reduce((acc, [current, period], index) => {
-            let time = acc;
-            const [maxHits] = limit[index];
-            const checkViolated = current >= maxHits;
+        return limitState.reduce(
+            (acc, [currentHits, maxPeriod, currentLimit], index) => {
+                let time = acc;
+                const [maxHits] = limit[index];
+                const checkViolated = currentHits >= maxHits;
 
-            if (checkViolated && acc < period) {
-                time = period;
-            }
+                if (checkViolated && acc < maxPeriod) {
+                    time = maxPeriod;
+                }
 
-            return time;
-        }, 0);
+                return time;
+            },
+            0,
+        );
     }
 
     getWaitTime(rateLimitKey: string): number {
