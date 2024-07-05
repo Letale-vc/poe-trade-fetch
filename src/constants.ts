@@ -14,45 +14,43 @@ export const POE_API_EXCHANGE_REQUEST = "api/trade/exchange/:league";
 // -------------------------------
 
 // --- League names  ---
-export const LEAGUES_NAMES = {
+export const LEAGUES_NAMES = Object.freeze({
     Current: "Current",
     Standard: "Standard",
     Hardcore: "Hardcore",
     Ruthless: "Ruthless",
-    HCRuthless: "HC Ruthless",
-    HCRuthlessCurrent: "HC Ruthless Current",
-    RuthlessCurrent: "Ruthless Current",
     HardcoreCurrent: "Hardcore Current",
-} as const;
+});
 
 //--------------------------------------------
 
 // --- game realms ---
-export const REALMS = {
+export const REALMS = Object.freeze({
     pc: "pc",
     xbox: "xbox",
     sony: "sony",
-} as const;
+});
 
 //------------------------------------
 
 // Default config for PoeTradeApi
-export const DEFAULT_CONFIG: ConfigType = {
+
+export const DEFAULT_CONFIG: ConfigType = Object.freeze({
     leagueName: LEAGUES_NAMES.Standard,
     userAgent: "",
     realm: REALMS.pc,
     POESESSID: null,
     useRateLimitDelay: true,
-} as const;
+});
 
-export const RATE_LIMIT_STATE_KEYS = {
+export const RATE_LIMIT_STATE_KEYS = Object.freeze({
     POE_API_FIRST_REQUEST,
     POE_API_SECOND_REQUEST,
     POE_API_EXCHANGE_REQUEST,
     OTHER: "OTHER",
-} as const;
+});
 
-export const POE_ERROR_CODES = {
+export const POE_ERROR_CODES = Object.freeze({
     0: "Accepted",
     1: "Resource not found",
     2: "Invalid query",
@@ -64,4 +62,4 @@ export const POE_ERROR_CODES = {
     7: "Temporarily Unavailable",
     9: "Method not allowed",
     10: "Unprocessable Entity",
-} as const;
+});
