@@ -91,3 +91,5 @@ web_modules/
 /dist
 # IDE - VSCode
 .vscode/
+
+.qodo
