@@ -71,7 +71,9 @@ export class HttpRequest {
                 }
 
                 const waitTime = this.rateLimiter.getWaitTime(limitKey);
-                await delay(waitTime);
+                if (this._appSetting.useRateLimitDelay) {
+                    await delay(waitTime);
+                }
             }
 
             return config;
