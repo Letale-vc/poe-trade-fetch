@@ -63,20 +63,7 @@ export type PoeSecondResult = {
 export type PoeSecondResponse = {
     result: PoeSecondResult[];
 };
-export enum FrameType {
-    Normal = 0,
-    Magic = 1,
-    Rare = 2,
-    Unique = 3,
-    Gem = 4,
-    Currency = 5,
-    DivinationCard = 6,
-    Quest = 7,
-    Prophecy = 8, // legacy
-    Foil = 9,
-    SupporterFoil = 10,
-    Necropolis = 11,
-}
+
 export type ItemType = {
     verified: boolean;
     w: number;
@@ -178,7 +165,7 @@ export type ItemType = {
         nodes: { [key: string]: CrucibleNode };
     };
     ruthless?: boolean;
-    frameType?: FrameType;
+    frameType?: number;
     artFilename?: string;
     hybrid?: {
         isVaalGem?: boolean;
@@ -218,19 +205,11 @@ export interface CrucibleNode {
 export type ItemProperty = {
     name: string;
     values: [string, number][];
-    displayMode?: DisplayMode;
+    displayMode?: number;
     progress?: number;
     type?: number;
     suffix?: string;
 };
-
-export enum DisplayMode {
-    NameFollowedByValues = 0,
-    ValuesFollowedByName = 1,
-    ProgressBar = 2,
-    ValuesInsertedIntoStringByIndex = 3,
-    Separator = 4,
-}
 
 export type ItemRequirement = {
     name: string;
