@@ -75,25 +75,25 @@
     },
     "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
     "dependencies": {
-        "axios": "^1.7.2",
-        "cheerio": "^1.0.0-rc.12"
+        "axios": "^1.8.1",
+        "cheerio": "^1.0.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "^1.8.1",
+        "@biomejs/biome": "^1.9.4",
         "@semantic-release/changelog": "^6.0.3",
-        "@semantic-release/commit-analyzer": "^11.1.0",
-        "@semantic-release/github": "^9.2.6",
-        "@semantic-release/npm": "^11.0.3",
-        "@semantic-release/release-notes-generator": "^12.1.0",
-        "@types/eslint": "^8.56.10",
-        "@types/jest": "^29.5.12",
-        "@types/node": "^20.14.2",
-        "axios-mock-adapter": "^1.22.0",
+        "@semantic-release/commit-analyzer": "^13.0.1",
+        "@semantic-release/github": "^11.0.1",
+        "@semantic-release/npm": "^12.0.1",
+        "@semantic-release/release-notes-generator": "^14.0.3",
+        "@types/eslint": "^9.6.1",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.13.9",
+        "axios-mock-adapter": "^2.1.0",
         "jest": "^29.7.0",
-        "rimraf": "^5.0.7",
-        "semantic-release": "^22.0.12",
-        "ts-jest": "^29.1.4",
+        "rimraf": "^6.0.1",
+        "semantic-release": "^24.2.3",
+        "ts-jest": "^29.2.6",
         "ts-node": "^10.9.2",
-        "typescript": "^5.4.5"
+        "typescript": "^5.8.2"
     }
 }
