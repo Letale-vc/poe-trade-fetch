@@ -1,4 +1,4 @@
-import type { ConfigType } from "./Types";
+import type { ConfigType } from "./Types/HelperTypes.js";
 
 //  PoE API URLs -----------------------------
 export const POE_API_BASE_URL = "https://www.pathofexile.com/";

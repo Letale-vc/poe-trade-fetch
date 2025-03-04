@@ -18,7 +18,7 @@ import type {
     ConfigInputType,
     ConfigType,
     ConfigUpdateType,
-} from "./Types/types.js";
+} from "./Types/HelperTypes.js";
 import {
     DEFAULT_CONFIG,
     LEAGUES_NAMES,
@@ -32,12 +32,13 @@ import {
 } from "./constants.js";
 import { HttpRequest } from "./httpRequest/HttpRequest.js";
 import { PoeTradeFetchError } from "./poeTradeFetchError.js";
+import type { IHttpRequest } from "./interface/IHttpRequest.js";
 
 export class PoeTradeFetch {
-    static instance: PoeTradeFetch;
+    private static _instance: PoeTradeFetch;
     leagueName: string;
     config: ConfigType;
-    httpRequest: HttpRequest;
+    httpRequest: IHttpRequest;
 
     constructor(config: ConfigInputType) {
         this.config = DEFAULT_CONFIG;
@@ -76,10 +77,10 @@ export class PoeTradeFetch {
     }
 
     static getInstance(config: ConfigInputType): PoeTradeFetch {
-        if (!PoeTradeFetch.instance) {
-            PoeTradeFetch.instance = new PoeTradeFetch(config);
+        if (!PoeTradeFetch._instance) {
+            PoeTradeFetch._instance = new PoeTradeFetch(config);
         }
-        return PoeTradeFetch.instance;
+        return PoeTradeFetch._instance;
     }
 
     async leagueList(): Promise<LeagueResponseType> {

@@ -1,5 +1,7 @@
+import assert from 'node:assert';
+import { after, afterEach, before, beforeEach, describe, it, mock } from 'node:test';
 import MockAdapter from "axios-mock-adapter";
-import type { ConfigType, RateStateLimitType } from "../Types/index.js";
+import type { ConfigType, RateStateLimitType } from "../Types/HelperTypes.js";
 import {
     DEFAULT_CONFIG,
     POE_API_BASE_URL,
@@ -7,36 +9,50 @@ import {
     POE_API_SECOND_REQUEST,
     RATE_LIMIT_STATE_KEYS,
 } from "../constants.js";
-import { delay } from "../utility/delay.js";
-import { HttpRequest } from "./HttpRequest.js";
-
-jest.mock("../utility/delay.js", () => ({
-    delay: jest.fn().mockImplementation(() => Promise.resolve()),
-}));
+import type { HttpRequest } from "./HttpRequest.js";
 
 describe("HttpRequest", () => {
     let httpRequest: HttpRequest;
     let mockAxios: MockAdapter;
     let configMock: ConfigType;
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    let httpRequestModule: { HttpRequest: any; };
+
+    const mockDelay = mock.fn(() => {
+        return Promise.resolve()
+    });
+    const mockDate = 1706059622008;
+    const mockDataNow = mock.fn(() => mockDate);
+
+    before(async () => {
+        mock.module("../utility/delay.js", {
+            namedExports: {
+                delay: mockDelay
+            },
+        })
+
+        configMock = { ...DEFAULT_CONFIG };
+        global.Date.now = mockDataNow;
+        httpRequestModule = await import("./HttpRequest.js");
+    })
+
+    after(() => {
+        mock.restoreAll()
+    })
 
     beforeEach(() => {
-        configMock = { ...DEFAULT_CONFIG };
-        const mockDate = 1706059622008;
-        global.Date.now = jest.fn(() => mockDate);
-        httpRequest = new HttpRequest(configMock);
+        httpRequest = new httpRequestModule.HttpRequest(configMock);
         mockAxios = new MockAdapter(httpRequest.axiosInstance);
     });
 
     afterEach(() => {
+        mockDelay.mock.resetCalls();
         mockAxios.reset();
-        (global.Date.now as unknown as jest.SpyInstance).mockRestore();
+        mockDataNow.mock.restore();
     });
 
-    test("should create an axios instance with the correct base URL and headers", () => {
-        expect(httpRequest.axiosInstance.defaults.baseURL).toBe(
-            POE_API_BASE_URL,
-        );
-        expect(httpRequest.axiosInstance.defaults.headers).toEqual({
+    it("should create an axios instance with the correct base URL and headers", () => {
+        assert.deepEqual(httpRequest.axiosInstance.defaults.headers, {
             "Content-Type": "application/json",
             "User-Agent": "",
             access: "*/*",
@@ -51,30 +67,28 @@ describe("HttpRequest", () => {
             post: {},
             put: {},
         });
+        assert.strictEqual(httpRequest.axiosInstance.defaults.baseURL, POE_API_BASE_URL);
     });
 
-    test("should set POESESSID as default", () => {
+    it("should set POESESSID as default", () => {
         configMock.POESESSID = "test-poesessid";
         httpRequest.setPoesessidAsDefault();
-        expect(httpRequest.axiosInstance.defaults.headers.common.Cookie).toBe(
-            "POESESSID=test-poesessid",
-        );
+        assert.strictEqual(httpRequest.axiosInstance.defaults.headers.common.Cookie, "POESESSID=test-poesessid");
     });
 
-    test("should make a GET request and return the response data", async () => {
-        mockAxios.onGet("/test").reply(200, { data: "test" });
-        const data = await httpRequest.get("/test");
-        expect(data).toEqual({ data: "test" });
+    it("should make a GET request and return the response data", async () => {
+        mockAxios.onGet("/test").reply(200, { data: "test" })
+        const data = await httpRequest.get("/test")
+        assert.deepStrictEqual(data, { data: "test" })
     });
 
-    test("should make a POST request and return the response data", async () => {
+    it("should make a POST request and return the response data", async () => {
         mockAxios.onPost("/test").reply(200, { data: "test" });
         const data = await httpRequest.post("/test", { key: "value" });
-
-        expect(data).toEqual({ data: "test" });
+        assert.deepStrictEqual(data, { data: "test" });
     });
 
-    test("should get the correct rate limit key", () => {
+    it("should get the correct rate limit key", () => {
         const firstRequestKey = httpRequest.getRateLimitKey(
             POE_API_FIRST_REQUEST,
         );
@@ -82,14 +96,10 @@ describe("HttpRequest", () => {
             POE_API_SECOND_REQUEST,
         );
         const otherKey = httpRequest.getRateLimitKey("/other");
-
-        expect(firstRequestKey).toBe(
-            RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
+        assert.strictEqual(firstRequestKey, RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
+        assert.strictEqual(secondRequestKey, RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST);
+        assert.strictEqual(otherKey, RATE_LIMIT_STATE_KEYS.OTHER
         );
-        expect(secondRequestKey).toBe(
-            RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST,
-        );
-        expect(otherKey).toBe(RATE_LIMIT_STATE_KEYS.OTHER);
     });
 
     describe("setupResponseInterceptors", () => {
@@ -115,12 +125,11 @@ describe("HttpRequest", () => {
             mockAxios.onAny().reply(200, {}, mockResponse.headers);
 
             await httpRequest.post("api/trade/search/League");
+            const result = httpRequest.rateLimiter.state.get(
+                RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
+            )
+            assert.deepStrictEqual(result, rateLimits);
 
-            expect(
-                httpRequest.rateLimiter.state.get(
-                    RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
-                ),
-            ).toEqual(rateLimits);
         });
 
         it("should handle response without rate limit headers", async () => {
@@ -136,44 +145,30 @@ describe("HttpRequest", () => {
                 ipLimit: [],
                 lastResponseTime: Date.now(),
             };
-
-            jest.spyOn(httpRequest.rateLimiter, "setRateLimitInfo");
-
+            const setRateLimitInfoMock = mock.fn();
+            httpRequest.rateLimiter.setRateLimitInfo = setRateLimitInfoMock;
             mockAxios.onAny().reply(200, {}, mockResponse.headers);
-
             await httpRequest.post(POE_API_FIRST_REQUEST);
-            expect(
-                httpRequest.rateLimiter.setRateLimitInfo,
-            ).toHaveBeenCalledWith(
-                RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
-                rateLimits,
-            );
+            assert.deepStrictEqual(setRateLimitInfoMock.mock.calls[0].arguments, [RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST, rateLimits])
+
         });
     });
 
     describe("setupRequestInterceptors", () => {
         it("should delay the request if useRateLimitDelay is true", async () => {
-            const delaySpy = jest.spyOn({ delay }, "delay");
-            httpRequest.rateLimiter.getWaitTime = jest
-                .fn()
-                .mockReturnValue(1000);
-            httpRequest.rateLimiter.canMakeRequest = jest
-                .fn()
-                .mockReturnValue(true);
+            const mockGetWaitTime = mock.method(httpRequest.rateLimiter, "getWaitTime", () => 1000);
             mockAxios.onGet("/test").reply(200, { data: "test" });
             await httpRequest.get("/test");
-
-            expect(delaySpy).toHaveBeenCalledWith(1000);
+            assert.strictEqual(mockGetWaitTime.mock.callCount(), 1)
+            assert.strictEqual(mockDelay.mock.callCount(), 1);
         });
 
         it("should not delay the request if useRateLimitDelay is false", async () => {
-            const delaySpy = jest.spyOn({ delay }, "delay");
             configMock.useRateLimitDelay = false;
-
             mockAxios.onGet("/test").reply(200, { data: "test" });
             await httpRequest.get("/test");
 
-            expect(delaySpy).not.toHaveBeenCalled();
+            assert.strictEqual(mockDelay.mock.callCount(), 0);
         });
     });
 });

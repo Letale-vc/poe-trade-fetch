@@ -2,7 +2,7 @@
     "compilerOptions": {
         "rootDir": "./src",
         "target": "ESNext",
-        // "module": "ES6",
+        "module": "esnext",
         "moduleResolution": "Node10",
         "removeComments": true,
         "allowJs": true,

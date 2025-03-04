@@ -8,7 +8,7 @@ import type {
     ConfigType,
     RateLimitKeys,
     RateStateLimitType,
-} from "../Types/types.js";
+} from "../Types/HelperTypes.js";
 import {
     POE_API_BASE_URL,
     POE_API_FIRST_REQUEST,
@@ -71,9 +71,8 @@ export class HttpRequest {
                 }
 
                 const waitTime = this.rateLimiter.getWaitTime(limitKey);
-                if (this._appSetting.useRateLimitDelay) {
-                    await delay(waitTime);
-                }
+                await delay(waitTime);
+
             }
 
             return config;

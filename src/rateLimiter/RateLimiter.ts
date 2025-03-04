@@ -1,4 +1,4 @@
-import type { RateStateLimitType } from "../Types/types";
+import type { RateStateLimitType } from "../Types/HelperTypes.js";
 
 export class RateLimiter {
     state = new Map<string, RateStateLimitType>();

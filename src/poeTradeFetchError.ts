@@ -1,5 +1,9 @@
 import { type AxiosError, isAxiosError } from "axios";
-import type { ErrorCodesType, ErrorMessagesType, PoeError } from "./Types";
+import type {
+    ErrorCodesType,
+    ErrorMessagesType,
+    PoeError,
+} from "./Types/PoeErrorMessage.js";
 
 export class PoeTradeFetchError extends Error {
     public axiosError: AxiosError | undefined;
