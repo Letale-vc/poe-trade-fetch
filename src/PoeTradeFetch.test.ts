@@ -1,6 +1,6 @@
 
 import assert from "node:assert";
-import test, { describe, beforeEach, it, mock, before } from "node:test";
+import test, { describe, beforeEach, it, mock, afterEach } from "node:test";
 import { PoeTradeFetch } from "./PoeTradeFetch";
 import type { ConfigInputType } from "./Types/HelperTypes.js";
 import type { LeagueResponseType } from "./Types/PoeLeagueResponseType.js";
@@ -20,7 +20,11 @@ describe("PoeTradeFetch", () => {
     let poeTradeFetch: PoeTradeFetch;
 
     beforeEach(() => {
-        poeTradeFetch = new PoeTradeFetch({ userAgent: "test-app" });
+        poeTradeFetch = PoeTradeFetch.createInstance({ userAgent: "test-app" });
+    });
+    afterEach(() => {
+        PoeTradeFetch.dispose();
+
     });
 
     describe("update", () => {
@@ -33,7 +37,7 @@ describe("PoeTradeFetch", () => {
 
     describe("getInstance", () => {
         it("should return an instance of PoeTradeFetch", () => {
-            const instance = PoeTradeFetch.getInstance({
+            const instance = PoeTradeFetch.createInstance({
                 userAgent: "test-app",
             });
             assert.strictEqual(instance instanceof PoeTradeFetch, true);

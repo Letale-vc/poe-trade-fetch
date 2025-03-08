@@ -2,6 +2,11 @@ import type { AxiosRequestConfig } from "axios";
 import * as cheerio from "cheerio";
 import type { ExchangeResponseType } from "./Types/ExchangeResponse.js";
 import type {
+    ConfigInputType,
+    ConfigType,
+    ConfigUpdateType,
+} from "./Types/HelperTypes.js";
+import type {
     ExchangeStateType,
     PageStatesType,
     SearchStateType,
@@ -14,11 +19,6 @@ import type {
 } from "./Types/PoeResponse.js";
 import type { TradeExchangeRequestType } from "./Types/TradeExchangeRequestBodyType.js";
 import type { RequestBodyType } from "./Types/TradeRequestBodyType.js";
-import type {
-    ConfigInputType,
-    ConfigType,
-    ConfigUpdateType,
-} from "./Types/HelperTypes.js";
 import {
     DEFAULT_CONFIG,
     LEAGUES_NAMES,
@@ -31,16 +31,16 @@ import {
     REALMS,
 } from "./constants.js";
 import { HttpRequest } from "./httpRequest/HttpRequest.js";
-import { PoeTradeFetchError } from "./poeTradeFetchError.js";
 import type { IHttpRequest } from "./interface/IHttpRequest.js";
+import { PoeTradeFetchError } from "./poeTradeFetchError.js";
 
 export class PoeTradeFetch {
-    private static _instance: PoeTradeFetch;
+    private static _instance: undefined | PoeTradeFetch;
     leagueName: string;
     config: ConfigType;
     httpRequest: IHttpRequest;
 
-    constructor(config: ConfigInputType) {
+    private constructor(config: ConfigInputType) {
         this.config = DEFAULT_CONFIG;
         this.config = { ...this.config, ...config };
         this.leagueName = LEAGUES_NAMES.Standard;
@@ -76,7 +76,14 @@ export class PoeTradeFetch {
         }
     }
 
-    static getInstance(config: ConfigInputType): PoeTradeFetch {
+    static get instance(): PoeTradeFetch {
+        if (!PoeTradeFetch._instance) {
+            throw new Error("Instance not created. Call createInstance() first");
+        }
+        return PoeTradeFetch._instance;
+    }
+
+    static createInstance(config: ConfigInputType): PoeTradeFetch {
         if (!PoeTradeFetch._instance) {
             PoeTradeFetch._instance = new PoeTradeFetch(config);
         }
@@ -268,5 +275,13 @@ export class PoeTradeFetch {
             "leagues" in parsedPageStates &&
             "league" in parsedPageStates
         );
+    }
+
+    static dispose() {
+        PoeTradeFetch._instance = undefined;
+    }
+
+    dispose() {
+        PoeTradeFetch.dispose();
     }
 }
