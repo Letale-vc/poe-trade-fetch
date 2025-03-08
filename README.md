@@ -110,10 +110,7 @@ The PoE API enforces rate limits. The library provides delay functionality to ma
 ```javascript
 // You need set "useRateLimitDelay" to "false" 
 const poeTradeFetch = PoeTradeFetch.createInstance({
-  leagueName: LEAGUES_NAMES.Current,  
   userAgent: 'My PoE App  your@mail.kek',
-  realm: REALMS.pc,                   
-  POESESSID: 'Your POESESSID',         
   useRateLimitDelay: false  
 });
 await poeTradeFetch.update();
