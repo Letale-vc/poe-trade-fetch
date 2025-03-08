@@ -6,17 +6,17 @@
 	"formatter": {
 		"enabled": true,
 		"formatWithErrors": false,
-		"indentStyle": "space",
 		"indentWidth": 4,
 		"lineEnding": "lf",
-		"lineWidth": 80,
-		"attributePosition": "auto",
+		"lineWidth": 120,
 		"ignore": [
 			"./.vscode/",
 			"./node_modules/",
 			"./coverage/",
 			"./dist/",
-			"./.github/"
+			"./.github/",
+			"./.qodo/",
+			"./.idea/"
 		]
 	},
 	"linter": {
@@ -29,21 +29,10 @@
 			"./coverage/",
 			"./dist/",
 			"./.github/",
-			"./tests/"
+			"./tests/",
+			"./.qodo/",
+			"./.idea/"
 		 ]
-	},
-	"javascript": {
-		"formatter": {
-			"jsxQuoteStyle": "double",
-			"quoteProperties": "asNeeded",
-			"trailingCommas": "all",
-			"semicolons": "always",
-			"arrowParentheses": "asNeeded",
-			"bracketSpacing": true,
-			"bracketSameLine": false,
-			"quoteStyle": "double",
-			"attributePosition": "auto"
-		}
 	},
 	"json": {
 		"formatter": {

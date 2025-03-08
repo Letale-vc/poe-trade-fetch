@@ -15,20 +15,20 @@ export const POE_API_EXCHANGE_REQUEST = "api/trade/exchange/:league";
 
 // --- League names  ---
 export const LEAGUES_NAMES = Object.freeze({
-    Current: "Current",
-    Standard: "Standard",
-    Hardcore: "Hardcore",
-    Ruthless: "Ruthless",
-    HardcoreCurrent: "Hardcore Current",
+	Current: "Current",
+	Standard: "Standard",
+	Hardcore: "Hardcore",
+	Ruthless: "Ruthless",
+	HardcoreCurrent: "Hardcore Current",
 });
 
 //--------------------------------------------
 
 // --- game realms ---
 export const REALMS = Object.freeze({
-    pc: "pc",
-    xbox: "xbox",
-    sony: "sony",
+	pc: "pc",
+	xbox: "xbox",
+	sony: "sony",
 });
 
 //------------------------------------
@@ -36,30 +36,30 @@ export const REALMS = Object.freeze({
 // Default config for PoeTradeApi
 
 export const DEFAULT_CONFIG: ConfigType = Object.freeze({
-    leagueName: LEAGUES_NAMES.Standard,
-    userAgent: "",
-    realm: REALMS.pc,
-    POESESSID: null,
-    useRateLimitDelay: true,
+	leagueName: LEAGUES_NAMES.Standard,
+	userAgent: "",
+	realm: REALMS.pc,
+	POESESSID: null,
+	useRateLimitDelay: true,
 });
 
 export const RATE_LIMIT_STATE_KEYS = Object.freeze({
-    POE_API_FIRST_REQUEST,
-    POE_API_SECOND_REQUEST,
-    POE_API_EXCHANGE_REQUEST,
-    OTHER: "OTHER",
+	POE_API_FIRST_REQUEST,
+	POE_API_SECOND_REQUEST,
+	POE_API_EXCHANGE_REQUEST,
+	OTHER: "OTHER",
 });
 
 export const POE_ERROR_CODES = Object.freeze({
-    0: "Accepted",
-    1: "Resource not found",
-    2: "Invalid query",
-    3: "Rate limit exceeded",
-    4: "Internal error",
-    5: "Unexpected content type",
-    8: "Unauthorized",
-    6: "Forbidden",
-    7: "Temporarily Unavailable",
-    9: "Method not allowed",
-    10: "Unprocessable Entity",
+	0: "Accepted",
+	1: "Resource not found",
+	2: "Invalid query",
+	3: "Rate limit exceeded",
+	4: "Internal error",
+	5: "Unexpected content type",
+	8: "Unauthorized",
+	6: "Forbidden",
+	7: "Temporarily Unavailable",
+	9: "Method not allowed",
+	10: "Unprocessable Entity",
 });

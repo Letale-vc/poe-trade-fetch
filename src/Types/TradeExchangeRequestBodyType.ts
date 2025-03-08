@@ -1,23 +1,24 @@
 export type Sort = {
-    have: string;
+	have: string;
 };
 
 export type Status = {
-    option: string;
+	option: string;
 };
 
 export type ExchangeQuery = {
-    status?: Status | string;
-    have?: string[];
-    want?: string[];
-    minimum?: number;
-    collapse?: boolean;
-    account?: string;
-    fulfillable?: null;
+	[key: string]: string | number | string[] | Status | boolean | null | undefined;
+	status?: Status | string;
+	have?: string[];
+	want?: string[];
+	minimum?: number;
+	collapse?: boolean;
+	account?: string;
+	fulfillable?: null;
 };
 
 export type TradeExchangeRequestType = {
-    query: ExchangeQuery;
-    sort?: Sort;
-    engine?: "new";
+	query: ExchangeQuery;
+	sort?: Sort;
+	engine?: "new";
 };
