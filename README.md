@@ -57,7 +57,7 @@ import {
     RATE_LIMIT_STATE_KEYS
 } from 'poe-trade-fetch';
 
-const poeTradeFetch = new PoeTradeFetch({
+const poeTradeFetch = PoeTradeFetch.createInstance({
   leagueName: LEAGUES_NAMES.Current,  // Default: 'Standard'
   userAgent: 'My PoE App  your@mail.kek',
   realm: REALMS.pc,                   // Default: pc
