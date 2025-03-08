@@ -62,6 +62,7 @@ const poeTradeFetch = PoeTradeFetch.createInstance({
   userAgent: 'My PoE App  your@mail.kek',
   realm: REALMS.pc,                   // Default: pc
   POESESSID: 'Your POESESSID',         // Optional: for increased request rate
+  useRateLimitDelay: true             // Default: true
 });
 await poeTradeFetch.update();
 ```
@@ -107,6 +108,16 @@ const currencyPrice = secondResult[0].listing.price.currency;
 The PoE API enforces rate limits. The library provides delay functionality to manage request timing:
 
 ```javascript
+// You need set "useRateLimitDelay" to "false" 
+const poeTradeFetch = PoeTradeFetch.createInstance({
+  leagueName: LEAGUES_NAMES.Current,  
+  userAgent: 'My PoE App  your@mail.kek',
+  realm: REALMS.pc,                   
+  POESESSID: 'Your POESESSID',         
+  useRateLimitDelay: false  
+});
+await poeTradeFetch.update();
+
 // Determine wait time before the first API request
 const firstDelay = poeTradeFetch.httpRequest.getWaitTime(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
 await poeTradeFetch.httpRequest.delay(firstDelay);
