@@ -10,13 +10,8 @@
 		"lineEnding": "lf",
 		"lineWidth": 120,
 		"ignore": [
-			"./.vscode/",
-			"./node_modules/",
-			"./coverage/",
-			"./dist/",
-			"./.github/",
-			"./.qodo/",
-			"./.idea/"
+			"node_modules",
+			"dist"
 		]
 	},
 	"linter": {
@@ -24,14 +19,9 @@
 			"recommended": true
 		},
 		"ignore": [
-			"./.vscode/",
-			"./node_modules/",
-			"./coverage/",
-			"./dist/",
-			"./.github/",
-			"./tests/",
-			"./.qodo/",
-			"./.idea/"
+			"node_modules",
+			"dist",
+			"tests"
 		 ]
 	},
 	"json": {

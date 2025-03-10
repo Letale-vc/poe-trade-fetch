@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import test, { describe, beforeEach, it, mock, afterEach } from "node:test";
-import { PoeTradeFetch } from "./PoeTradeFetch";
+import { PoeTradeFetch } from "./PoeTradeFetch.js";
 import type { ConfigInputType } from "./Types/HelperTypes.js";
 import type { LeagueResponseType } from "./Types/PoeLeagueResponseType.js";
 import type { PoeFirstResponse, PoeSecondResponse } from "./Types/PoeResponse.js";
@@ -38,7 +38,7 @@ describe("PoeTradeFetch", () => {
 		it("should return league names", async () => {
 			const leagueNames = ["League1", "League2"];
 			mock.method(poeTradeFetch.httpRequest, "get", () => Promise.resolve({ result: leagueNames }));
-			const result = await poeTradeFetch.leagueList();
+			const result = await poeTradeFetch.leaguesList();
 			assert.deepStrictEqual(result, { result: leagueNames });
 		});
 	});
@@ -47,39 +47,36 @@ describe("PoeTradeFetch", () => {
 		test("should update leagueName to Standard if current league not found", async () => {
 			const config: ConfigInputType = {
 				userAgent: "test",
-				leagueName: LEAGUES_NAMES.Current,
-				realm: REALMS.pc,
+				leagueName: LEAGUES_NAMES.CURRENT,
+				realm: REALMS.PC,
 				POESESSID: "test",
 			};
 
 			mock.method(poeTradeFetch, "getCurrentLeagueName", () => Promise.resolve(undefined));
 			assert.rejects(poeTradeFetch.updateConfig(config));
-			assert.rejects(poeTradeFetch.updateLeagueName());
 		});
 
 		test("should update leagueName to current league if found", async () => {
 			const config: ConfigInputType = {
 				userAgent: "test",
-				leagueName: LEAGUES_NAMES.Current,
-				realm: REALMS.pc,
+				leagueName: LEAGUES_NAMES.CURRENT,
+				realm: REALMS.PC,
 				POESESSID: "test",
 			};
 			mock.method(poeTradeFetch, "getCurrentLeagueName", () => Promise.resolve("testLeague"));
 			await poeTradeFetch.updateConfig(config);
-			await poeTradeFetch.updateLeagueName();
 			assert.strictEqual(poeTradeFetch.leagueName, "testLeague");
 		});
 
 		test("should not update leagueName if it does not include Current", async () => {
 			const config: ConfigInputType = {
 				userAgent: "test",
-				leagueName: LEAGUES_NAMES.Hardcore,
-				realm: REALMS.pc,
+				leagueName: LEAGUES_NAMES.HARDCORE,
+				realm: REALMS.PC,
 				POESESSID: "test",
 			};
 			await poeTradeFetch.updateConfig(config);
-			await poeTradeFetch.updateLeagueName();
-			assert.strictEqual(poeTradeFetch.leagueName, LEAGUES_NAMES.Hardcore);
+			assert.strictEqual(poeTradeFetch.leagueName, LEAGUES_NAMES.HARDCORE);
 		});
 	});
 
@@ -185,13 +182,13 @@ describe("PoeTradeFetch", () => {
 
 				const mockGet = mock.method(poeTradeFetch.httpRequest, "get", () => Promise.resolve(response));
 
-				poeTradeFetch.config.realm = REALMS.xbox; // set non-pc realm
+				poeTradeFetch.config.realm = REALMS.XBOX; // set non-pc realm
 
 				const result = await poeTradeFetch.secondRequest(arrayIds, queryId);
 				assert.deepStrictEqual(result, response);
 				const expectedPath = `${POE_API_SECOND_REQUEST}${arrayIds.join(
 					",",
-				)}?query=${queryId}&realm=${REALMS.xbox}`;
+				)}?query=${queryId}&realm=${REALMS.XBOX}`;
 				assert.deepStrictEqual(mockGet.mock.calls[0].arguments, [expectedPath, undefined]);
 			});
 
