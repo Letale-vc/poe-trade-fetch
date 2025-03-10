@@ -2,28 +2,13 @@
     "name": "poe-trade-fetch",
     "version": "0.0.0-development",
     "description": "poe trade fetch",
-    "main": "./dist/cjs/index.js",
-    "module": "./dist/esm/index.js",
-    "types": "./index.d.ts",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
-        ".": {
-            "types": "./dist/types/index.d.ts",
-            "require": "./dist/cjs/index.js",
-            "import": "./dist/esm/index.js",
-            "default": "./dist/esm/index.js"
-        },
         "./*": {
-            "types": "./dist/types/*.d.ts",
-            "require": "./dist/cjs/*.js",
-            "import": "./dist/esm/*.js",
-            "default": "./dist/esm/*.js"
-        }
-    },
-    "typesVersions": {
-        ">=4.2": {
-            "*": [
-                "./dist/types/*"
-            ]
+            "types": "./dist/*.d.ts",
+            "default": "./dist/*.js"
         }
     },
     "type": "module",
@@ -42,13 +27,14 @@
     },
     "scripts": {
         "prebuild": "rimraf dist",
-        "build": "npm run prebuild && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.types.json && node fixTypeModule.js",
+        "build": "npm run prebuild && tsc --traceResolution",
         "lint": "npx @biomejs/biome lint .",
         "lint-fix": "npx @biomejs/biome lint . --write",
         "format": "npx @biomejs/biome format . --write",
         "pub": "npm run build && npm publish",
         "semantic-release": "semantic-release",
-        "test": "node --experimental-test-module-mocks --import tsx --test **/*.test.ts"
+        "test": "node --experimental-test-module-mocks --import tsx --test **/*.test.ts",
+        "test:live": "node --env-file=.env --import tsx ./tests/liveTest.ts"
     },
     "repository": {
         "type": "git",
@@ -75,8 +61,7 @@
     },
     "homepage": "https://github.com/Letale-vc/poe-trade-fetch#readme",
     "dependencies": {
-        "axios": "^1.8.1",
-        "cheerio": "^1.0.0"
+        "axios": "^1.8.2"
     },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
@@ -85,7 +70,7 @@
         "@semantic-release/github": "^11.0.1",
         "@semantic-release/npm": "^12.0.1",
         "@semantic-release/release-notes-generator": "^14.0.3",
-        "@types/node": "^22.13.9",
+        "@types/node": "^22.13.10",
         "axios-mock-adapter": "^2.1.0",
         "concurrently": "^9.1.2",
         "rimraf": "^6.0.1",

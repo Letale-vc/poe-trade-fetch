@@ -1,20 +1,21 @@
 import assert from "node:assert";
 import { after, afterEach, before, beforeEach, describe, it, mock } from "node:test";
 import MockAdapter from "axios-mock-adapter";
-import type { ConfigType, RateStateLimitType } from "../Types/HelperTypes.js";
-import {
-	DEFAULT_CONFIG,
-	POE_API_BASE_URL,
-	POE_API_FIRST_REQUEST,
-	POE_API_SECOND_REQUEST,
-	RATE_LIMIT_STATE_KEYS,
-} from "../constants.js";
+import { LEAGUES_NAMES, POE_API_BASE_URL, REALMS } from "../constants.js";
+import type { IConfig } from "../interface/IConfig.js";
 import type { HttpRequest } from "./HttpRequest.js";
 
 describe("HttpRequest", () => {
 	let httpRequest: HttpRequest;
 	let mockAxios: MockAdapter;
-	let configMock: ConfigType;
+	let configMock: IConfig;
+	const mockRateLimiter = {
+		setRateLimitInfo: mock.fn(),
+		getWaitTime: mock.fn(),
+		canMakeRequest: mock.fn(),
+		getRateLimitKey: mock.fn(),
+	};
+
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	let httpRequestModule: { HttpRequest: any };
 
@@ -30,8 +31,13 @@ describe("HttpRequest", () => {
 				delay: mockDelay,
 			},
 		});
-
-		configMock = { ...DEFAULT_CONFIG };
+		configMock = {
+			leagueName: LEAGUES_NAMES.CURRENT,
+			userAgent: "",
+			realm: REALMS.PC,
+			POESESSID: "",
+			useRateLimitDelay: false,
+		};
 		global.Date.now = mockDataNow;
 		httpRequestModule = await import("./HttpRequest.js");
 	});
@@ -41,7 +47,7 @@ describe("HttpRequest", () => {
 	});
 
 	beforeEach(() => {
-		httpRequest = new httpRequestModule.HttpRequest(configMock);
+		httpRequest = new httpRequestModule.HttpRequest(configMock, mockRateLimiter);
 		mockAxios = new MockAdapter(httpRequest.axiosInstance);
 	});
 
@@ -49,6 +55,10 @@ describe("HttpRequest", () => {
 		mockDelay.mock.resetCalls();
 		mockAxios.reset();
 		mockDataNow.mock.restore();
+		mockRateLimiter.setRateLimitInfo.mock.resetCalls();
+		mockRateLimiter.getWaitTime.mock.resetCalls();
+		mockRateLimiter.canMakeRequest.mock.resetCalls();
+		mockRateLimiter.getRateLimitKey.mock.resetCalls();
 	});
 
 	it("should create an axios instance with the correct base URL and headers", () => {
@@ -88,72 +98,35 @@ describe("HttpRequest", () => {
 		assert.deepStrictEqual(data, { data: "test" });
 	});
 
-	it("should get the correct rate limit key", () => {
-		const firstRequestKey = httpRequest.getRateLimitKey(POE_API_FIRST_REQUEST);
-		const secondRequestKey = httpRequest.getRateLimitKey(POE_API_SECOND_REQUEST);
-		const otherKey = httpRequest.getRateLimitKey("/other");
-		assert.strictEqual(firstRequestKey, RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
-		assert.strictEqual(secondRequestKey, RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST);
-		assert.strictEqual(otherKey, RATE_LIMIT_STATE_KEYS.OTHER);
-	});
-
 	describe("setupResponseInterceptors", () => {
-		it("should correctly set rate limit information when response interceptors are set up", async () => {
+		it("should correct call setRatelimitInformation", async () => {
+			const headers = {
+				"x-rate-limit-ip": "60:60:60",
+				"x-rate-limit-ip-state": "0:60:60",
+				"x-rate-limit-account": "45:60:60",
+				"x-rate-limit-account-state": "0:60:60",
+			};
+			const url = "api/trade/search/League";
 			const mockResponse = {
-				config: { url: "api/trade/search/League" },
-				headers: {
-					"x-rate-limit-ip": "60:60:60",
-					"x-rate-limit-ip-state": "0:60:60",
-					"x-rate-limit-account": "45:60:60",
-					"x-rate-limit-account-state": "0:60:60",
-				},
+				config: { url: url },
+				headers: headers,
 			};
-
-			const rateLimits: RateStateLimitType = {
-				accountLimitState: [[0, 60, 60]],
-				ipLimitState: [[0, 60, 60]],
-				accountLimit: [[45, 60, 60]],
-				ipLimit: [[60, 60, 60]],
-				lastResponseTime: Date.now(),
-			};
-
+			const key = url;
+			mock.method(mockRateLimiter, "getRateLimitKey", () => key);
 			mockAxios.onAny().reply(200, {}, mockResponse.headers);
-
-			await httpRequest.post("api/trade/search/League");
-			const result = httpRequest.rateLimiter.state.get(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
-			assert.deepStrictEqual(result, rateLimits);
-		});
-
-		it("should handle response without rate limit headers", async () => {
-			const mockResponse = {
-				config: { url: POE_API_FIRST_REQUEST },
-				headers: {},
-			};
-
-			const rateLimits: RateStateLimitType = {
-				accountLimitState: [],
-				ipLimitState: [],
-				accountLimit: [],
-				ipLimit: [],
-				lastResponseTime: Date.now(),
-			};
-			const setRateLimitInfoMock = mock.fn();
-			httpRequest.rateLimiter.setRateLimitInfo = setRateLimitInfoMock;
-			mockAxios.onAny().reply(200, {}, mockResponse.headers);
-			await httpRequest.post(POE_API_FIRST_REQUEST);
-			assert.deepStrictEqual(setRateLimitInfoMock.mock.calls[0].arguments, [
-				RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST,
-				rateLimits,
-			]);
+			await httpRequest.post(url);
+			const actualKey = mockRateLimiter.getRateLimitKey.mock.calls[0].arguments[0];
+			const actualHeaders = mockRateLimiter.setRateLimitInfo.mock.calls[0].arguments[1];
+			assert.partialDeepStrictEqual(actualHeaders, headers);
+			assert.strictEqual(actualKey, key);
 		});
 	});
 
 	describe("setupRequestInterceptors", () => {
 		it("should delay the request if useRateLimitDelay is true", async () => {
-			const mockGetWaitTime = mock.method(httpRequest.rateLimiter, "getWaitTime", () => 1000);
+			configMock.useRateLimitDelay = true;
 			mockAxios.onGet("/test").reply(200, { data: "test" });
 			await httpRequest.get("/test");
-			assert.strictEqual(mockGetWaitTime.mock.callCount(), 1);
 			assert.strictEqual(mockDelay.mock.callCount(), 1);
 		});
 
@@ -161,7 +134,6 @@ describe("HttpRequest", () => {
 			configMock.useRateLimitDelay = false;
 			mockAxios.onGet("/test").reply(200, { data: "test" });
 			await httpRequest.get("/test");
-
 			assert.strictEqual(mockDelay.mock.callCount(), 0);
 		});
 	});

@@ -62,7 +62,7 @@ const poeTradeFetch = PoeTradeFetch.createInstance({
   userAgent: 'My PoE App  your@mail.kek',
   realm: REALMS.pc,                   // Default: pc
   POESESSID: 'Your POESESSID',         // Optional: for increased request rate
-  useRateLimitDelay: true             // Default: true
+  useRateLimitDelay: true             // Default: true 
 });
 await poeTradeFetch.update();
 ```
@@ -102,29 +102,6 @@ console.log('Trade Data Items:', secondResult);
 const numberPrice = secondResult[0].listing.price.amount;
 const currencyPrice = secondResult[0].listing.price.currency;
 ```
-
-### Handling Rate Limits
-
-The PoE API enforces rate limits. The library provides delay functionality to manage request timing:
-
-```javascript
-// You need set "useRateLimitDelay" to "false" 
-const poeTradeFetch = PoeTradeFetch.createInstance({
-  userAgent: 'My PoE App  your@mail.kek',
-  useRateLimitDelay: false  
-});
-await poeTradeFetch.update();
-
-// Determine wait time before the first API request
-const firstDelay = poeTradeFetch.httpRequest.getWaitTime(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
-await poeTradeFetch.httpRequest.delay(firstDelay);
-
-// After the first request, wait before making the second request
-const secondDelay = poeTradeFetch.httpRequest.getWaitTime(RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST);
-await poeTradeFetch.httpRequest.delay(secondDelay);
-```
-
-> **Note:** If you exceed the rate limit, the library will throw an error. Handle exceptions accordingly to ensure robust application behavior.
 
 ## API Reference
 

@@ -1,11 +1,11 @@
-import type { POE_ERROR_CODES } from "../constants";
+import type { POE_ERROR_CODES } from "../constants.js";
 
 export type PoeError = {
 	error: {
-		code: ErrorCodesType;
-		message: ErrorMessagesType;
+		code: ErrorCodeType;
+		message: ErrorMessageType;
 	};
 };
 
-export type ErrorCodesType = keyof typeof POE_ERROR_CODES;
-export type ErrorMessagesType = (typeof POE_ERROR_CODES)[keyof typeof POE_ERROR_CODES];
+export type ErrorMessageType = keyof typeof POE_ERROR_CODES;
+export type ErrorCodeType = (typeof POE_ERROR_CODES)[keyof typeof POE_ERROR_CODES];

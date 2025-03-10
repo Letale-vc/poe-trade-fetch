@@ -1,28 +1,59 @@
 import assert from "node:assert/strict";
-import { beforeEach, describe, test } from "node:test";
-import type { RateStateLimitType } from "../Types/HelperTypes.js";
-import { RateLimiter } from "./RateLimiter";
+import { beforeEach, describe, it, test } from "node:test";
+import { POE_API_FIRST_REQUEST, POE_API_SECOND_REQUEST, RATE_LIMIT_STATE_KEYS } from "../constants.js";
+import { RateLimiter, type RateStateLimitType } from "./RateLimiter.js";
 
 describe("RateLimiter", () => {
 	let rateLimiter: RateLimiter;
 	let rateLimitKey: string;
-	let rateLimitInfo: RateStateLimitType;
 
 	beforeEach(() => {
 		rateLimiter = new RateLimiter();
 		rateLimitKey = "testKey";
-		rateLimitInfo = {
-			lastResponseTime: new Date().getTime(),
-			accountLimitState: [[1, 5]],
-			accountLimit: [[3, 5]],
-			ipLimitState: [[1, 7]],
-			ipLimit: [[3, 7]],
+	});
+
+	it("should get the correct rate limit key", () => {
+		const firstRequestKey = rateLimiter.getRateLimitKey(POE_API_FIRST_REQUEST);
+		const secondRequestKey = rateLimiter.getRateLimitKey(POE_API_SECOND_REQUEST);
+		const otherKey = rateLimiter.getRateLimitKey("/other");
+		assert.strictEqual(firstRequestKey, RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
+		assert.strictEqual(secondRequestKey, RATE_LIMIT_STATE_KEYS.POE_API_SECOND_REQUEST);
+		assert.strictEqual(otherKey, RATE_LIMIT_STATE_KEYS.OTHER);
+	});
+
+	it("should correctly set rate limit information", async () => {
+		const headers = {
+			"x-rate-limit-ip": "60:60:60",
+			"x-rate-limit-ip-state": "0:60:60",
+			"x-rate-limit-account": "45:60:60",
+			"x-rate-limit-account-state": "0:60:60",
 		};
+
+		const rateLimits: RateStateLimitType = {
+			accountLimitState: [[0, 60, 60]],
+			ipLimitState: [[0, 60, 60]],
+			accountLimit: [[45, 60, 60]],
+			ipLimit: [[60, 60, 60]],
+			lastResponseTime: Date.now(),
+		};
+
+		rateLimiter.setRateLimitInfo(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST, headers);
+		const state = rateLimiter.state.get(RATE_LIMIT_STATE_KEYS.POE_API_FIRST_REQUEST);
+		if (!state) {
+			assert.fail("state is undefined");
+		}
+		assert.deepStrictEqual(state, rateLimits);
 	});
 
 	describe("setRateLimitInfo", () => {
 		test("should set rate limit info correctly", () => {
-			rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
+			const headers = {
+				"x-rate-limit-ip": "3:7",
+				"x-rate-limit-ip-state": "1:7",
+				"x-rate-limit-account": "3:5",
+				"x-rate-limit-account-state": "1:5",
+			};
+			rateLimiter.setRateLimitInfo(rateLimitKey, headers);
 			const result = rateLimiter.getWaitTime(rateLimitKey);
 			assert.strictEqual(result, 0);
 		});
@@ -30,16 +61,32 @@ describe("RateLimiter", () => {
 
 	describe("canMakeRequest", () => {
 		test("should return true when getWaitTime returns 0", () => {
-			rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
+			const headers = {
+				"x-rate-limit-ip": "3:7",
+				"x-rate-limit-ip-state": "1:7",
+				"x-rate-limit-account": "3:5",
+				"x-rate-limit-account-state": "1:5",
+			};
+			rateLimiter.setRateLimitInfo(rateLimitKey, headers);
 			const result = rateLimiter.canMakeRequest(rateLimitKey);
 			assert.strictEqual(result, true);
 		});
 
 		test("should return false when getWaitTime returns a non-zero value", () => {
-			rateLimitInfo.lastResponseTime = new Date().getTime() - 1000;
-			rateLimitInfo.accountLimitState = [[3, 5]];
-			rateLimitInfo.ipLimitState = [[3, 7]];
-			rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
+			const headers = {
+				"x-rate-limit-ip": "3:7",
+				"x-rate-limit-ip-state": "3:7",
+				"x-rate-limit-account": "3:5",
+				"x-rate-limit-account-state": "3:5",
+			};
+
+			rateLimiter.setRateLimitInfo(rateLimitKey, headers);
+
+			const state = rateLimiter.state.get(rateLimitKey);
+			if (!state) {
+				assert.fail("state is undefined");
+			}
+			state.lastResponseTime = new Date().getTime() - 1000;
 			const result = rateLimiter.canMakeRequest(rateLimitKey);
 			assert.strictEqual(result, false);
 		});
@@ -52,18 +99,35 @@ describe("RateLimiter", () => {
 		});
 
 		test("should return correct wait time", () => {
-			rateLimitInfo.lastResponseTime = new Date().getTime() - 1000;
-			rateLimitInfo.accountLimitState = [[3, 5]];
-			rateLimitInfo.ipLimitState = [[3, 7]];
-			rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
+			const headers = {
+				"x-rate-limit-ip": "3:7",
+				"x-rate-limit-ip-state": "3:7",
+				"x-rate-limit-account": "3:5",
+				"x-rate-limit-account-state": "3:5",
+			};
+
+			rateLimiter.setRateLimitInfo(rateLimitKey, headers);
+			const state = rateLimiter.state.get(rateLimitKey);
+			if (!state) {
+				assert.fail("state is undefined");
+			}
+			state.lastResponseTime = new Date().getTime() - 1000;
 			const result = rateLimiter.getWaitTime(rateLimitKey);
 			assert.strictEqual(result, 6);
 		});
 		test("should subtract differenceTimeInSec from waitTime if differenceTimeInSec is less than or equal to waitTime", () => {
-			rateLimitInfo.lastResponseTime = Date.now() - 2000;
-			rateLimitInfo.accountLimitState = [[3, 5]];
-			rateLimitInfo.ipLimitState = [[3, 7]];
-			rateLimiter.setRateLimitInfo(rateLimitKey, rateLimitInfo);
+			const headers = {
+				"x-rate-limit-ip": "3:7",
+				"x-rate-limit-ip-state": "3:7",
+				"x-rate-limit-account": "3:5",
+				"x-rate-limit-account-state": "3:5",
+			};
+			rateLimiter.setRateLimitInfo(rateLimitKey, headers);
+			const state = rateLimiter.state.get(rateLimitKey);
+			if (!state) {
+				assert.fail("state is undefined");
+			}
+			state.lastResponseTime = new Date().getTime() - 2000;
 			const result = rateLimiter.getWaitTime(rateLimitKey);
 			assert.strictEqual(result, 5);
 		});

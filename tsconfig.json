@@ -1,25 +1,20 @@
 {
     "compilerOptions": {
         "rootDir": "./src",
-        "target": "ESNext",
-        "module": "esnext",
-        "moduleResolution": "Node10",
-        "removeComments": true,
-        "allowJs": true,
+        "target": "es2024",
+        "module": "NodeNext",
+        "moduleResolution": "nodenext",
         "strict": true,
+        "outDir": "./dist",
+        "declaration": true,
+        "alwaysStrict": true,
         "esModuleInterop": true,
         "erasableSyntaxOnly": true
     },
     "exclude": [
         "node_modules",
-        "**/*.spec.ts",
-        "dist",
-        "coverage",
         "tests",
-        "index.d.ts",
-        "example",
-        "jest.config.js",
-        ".eslintrc.cjs",
-        "fixTypeModule.js"
+        "dist",
+        "**/*.test.ts",
     ]
 }
