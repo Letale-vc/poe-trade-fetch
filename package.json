@@ -7,12 +7,14 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".":{
-        "types":"./dist/index.js",
-        "default":"./dist/index.js"
+        "types":"./dist/index.d.ts",
+        "default":"./dist/index.js",
+        "import": "./dist/index.js"
         },
         "./*": {
             "types": "./dist/*.d.ts",
-            "default": "./dist/*.js"
+            "default": "./dist/*.js",
+            "import": "./dist/*.js"
         }
     },
     "type": "module",
